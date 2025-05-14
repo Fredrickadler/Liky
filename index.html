@@ -7,6 +7,7 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
   <style>
@@ -35,7 +36,7 @@
       overflow: hidden;
       position: relative;
     }
-    
+
     .header {
       padding: 15px;
       display: flex;
@@ -224,7 +225,7 @@
       border-radius: 3px;
       transition: width 0.5s ease;
     }
-    
+
     /* دکمه‌های عمل */
     .action-buttons {
       display: grid;
@@ -261,7 +262,7 @@
     .action-btn i {
       font-size: 20px;
     }
-    
+
     /* نوار پایینی */
     .tab-bar {
       display: flex;
@@ -309,7 +310,7 @@
           <p class="post-description">Like this post to earn 1 COIN. Verify after liking.</p>
         </div>
       </div>
-      
+
       <div class="progress-container">
         <div class="progress-info">
           <span>65% completed</span>
@@ -336,12 +337,11 @@
       </div>
     </div>
   </div>
-  
-  <!-- سایر صفحات -->
+
   <div class="page" id="leaderboard-page"></div>
   <div class="page" id="profile-page"></div>
   <div class="page" id="order-page"></div>
-  
+
   <script>
     let provider;
     let signer;
