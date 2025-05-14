@@ -7,7 +7,6 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
   <style>
@@ -36,6 +35,7 @@
       overflow: hidden;
       position: relative;
     }
+    
     .header {
       padding: 15px;
       display: flex;
@@ -73,6 +73,58 @@
       display: none;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); 
     }
+    .back-btn {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 5px;
+    }
+    .add-order-btn {
+      background: var(--primary);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .add-order-btn:hover {
+      transform: scale(1.1);
+      background: var(--primary-dark);
+    }
+
+    /* انیمیشن ستاره‌ها */
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+    .star {
+      position: absolute;
+      background: rgba(138, 90, 255, 0.7);
+      border-radius: 50%;
+      animation: twinkle 3s infinite ease-in-out, float 50s linear infinite;
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+    @keyframes float {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(100px, -100vh); }
+    }
+
+    /* صفحه اصلی */
     .page {
       flex: 1;
       display: none;
@@ -87,6 +139,93 @@
       from { opacity: 0; }
       to { opacity: 1; }
     }
+    
+    /* محتوای پست */
+    .post-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+      overflow-y: auto;
+    }
+    .post-image-container {
+      width: 100%;
+      max-width: 500px;
+      height: 400px;
+      position: relative;
+      margin-bottom: 20px;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .post-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    .post-image-container:hover .post-image {
+      transform: scale(1.03);
+    }
+    .no-photo {
+      width: 100%;
+      height: 100%;
+      background: var(--gray-800);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: var(--gray-400);
+    }
+    .post-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0) 100%);
+      padding: 20px;
+    }
+    .post-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .post-description {
+      color: var(--gray-200);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    
+    /* نوار پیشرفت */
+    .progress-container {
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 20px;
+    }
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: var(--gray-400);
+    }
+    .progress-bar {
+      height: 6px;
+      width: 100%;
+      background: var(--gray-700);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 65%;
+      background: var(--primary);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+    
+    /* دکمه‌های عمل */
     .action-buttons {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -122,6 +261,28 @@
     .action-btn i {
       font-size: 20px;
     }
+    
+    /* نوار پایینی */
+    .tab-bar {
+      display: flex;
+      background: var(--gray-800);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 15px;
+      text-align: center;
+      color: var(--gray-400);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .tab-btn.active {
+      color: var(--primary);
+    }
+    .tab-btn i {
+      font-size: 20px;
+      display: block;
+      margin-bottom: 5px;
+    }
   </style>
 </head>
 <body>
@@ -149,6 +310,16 @@
         </div>
       </div>
       
+      <div class="progress-container">
+        <div class="progress-info">
+          <span>65% completed</span>
+          <span>142/220 likes</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill"></div>
+        </div>
+      </div>
+      
       <div class="action-buttons">
         <button class="action-btn" onclick="skipPost()">
           <i class="fas fa-forward"></i>
@@ -165,7 +336,8 @@
       </div>
     </div>
   </div>
-
+  
+  <!-- سایر صفحات -->
   <div class="page" id="leaderboard-page"></div>
   <div class="page" id="profile-page"></div>
   <div class="page" id="order-page"></div>
