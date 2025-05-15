@@ -5,14 +5,271 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>FarKaster</title>
 
-  <!-- فونت‌ها و کتابخانه‌های خارجی -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk@latest/dist/farcaster-sdk.min.js"></script> <!-- اضافه کردن SDK Farcaster -->
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  
-  <!-- فایل‌های CSS شخصی -->
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/animations.css">
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+    :root {
+      --primary: #8A5AFF;
+      --primary-dark: #6E3AFF;
+      --gray-900: #0F0F0F;
+      --gray-800: #1A1A1A;
+      --gray-700: #2E2E2E;
+      --gray-400: #A0A0A0;
+      --gray-200: #E5E5E5;
+      --gold: #FFD700;
+      --silver: #C0C0C0;
+      --bronze: #CD7F32;
+      --error: #FF4D4D;
+      --success: #4CAF50;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Space Grotesk', sans-serif; }
+    body { 
+      background-color: var(--gray-900); 
+      color: white; 
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    /* هدر */
+    .header {
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+    .wallet-btn {
+      background: var(--primary); 
+      color: white; 
+      border: none; 
+      padding: 12px 24px;
+      border-radius: 12px; 
+      cursor: pointer; 
+      font-weight: 600; 
+      font-size: 16px;
+      transition: all 0.3s ease; 
+      display: flex; 
+      align-items: center; 
+      gap: 8px;
+      box-shadow: 0 4px 20px rgba(138, 90, 255, 0.3);
+    }
+    .wallet-btn:hover { 
+      background: var(--primary-dark); 
+      transform: translateY(-2px); 
+      box-shadow: 0 6px 25px rgba(138, 90, 255, 0.4); 
+    }
+    .wallet-btn i { font-size: 16px; }
+    .wallet-address {
+      background: var(--gray-800); 
+      padding: 12px 24px; 
+      border-radius: 12px;
+      font-size: 16px; 
+      font-weight: 500; 
+      display: none;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); 
+    }
+    .add-order-btn {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 5px;
+    }
+    
+    /* انیمیشن ستاره‌ها */
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+    .star {
+      position: absolute;
+      background: rgba(138, 90, 255, 0.7);
+      border-radius: 50%;
+      animation: twinkle 3s infinite ease-in-out, float 50s linear infinite;
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+    @keyframes float {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(100px, -100vh); }
+    }
+    
+    /* صفحه اصلی */
+    .page {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .page.active {
+      display: flex;
+      animation: fadeIn 0.5s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    /* محتوای پست */
+    .post-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+      overflow-y: auto;
+    }
+    .post-image-container {
+      width: 100%;
+      max-width: 500px;
+      height: 400px;
+      position: relative;
+      margin-bottom: 20px;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .post-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    .post-image-container:hover .post-image {
+      transform: scale(1.03);
+    }
+    .no-photo {
+      width: 100%;
+      height: 100%;
+      background: var(--gray-800);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: var(--gray-400);
+    }
+    .post-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0) 100%);
+      padding: 20px;
+    }
+    .post-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .post-description {
+      color: var(--gray-200);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    
+    /* نوار پیشرفت */
+    .progress-container {
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 20px;
+    }
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: var(--gray-400);
+    }
+    .progress-bar {
+      height: 6px;
+      width: 100%;
+      background: var(--gray-700);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 65%;
+      background: var(--primary);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+    
+    /* دکمه‌های عمل */
+    .action-buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      width: 100%;
+      max-width: 500px;
+      padding-bottom: 20px;
+    }
+    .action-btn {
+      background: var(--gray-800);
+      border: none;
+      padding: 15px;
+      border-radius: 12px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+    .action-btn:hover {
+      transform: translateY(-3px);
+    }
+    .action-btn.primary {
+      background: var(--primary);
+      box-shadow: 0 4px 20px rgba(138, 90, 255, 0.3);
+    }
+    .action-btn.primary:hover {
+      background: var(--primary-dark);
+    }
+    .action-btn i {
+      font-size: 20px;
+    }
+    
+    /* نوار پایینی */
+    .tab-bar {
+      display: flex;
+      background: var(--gray-800);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 15px;
+      text-align: center;
+      color: var(--gray-400);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .tab-btn.active {
+      color: var(--primary);
+    }
+    .tab-btn i {
+      font-size: 20px;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+  </style>
 </head>
 <body>
   <!-- انیمیشن ستاره‌ها -->
@@ -24,7 +281,7 @@
       <div class="add-order-btn" onclick="showPage('order-page')">
         <i class="fas fa-plus"></i>
       </div>
-      <button class="wallet-btn" id="connectWallet">
+      <button class="wallet-btn" id="connectWallet" onclick="connectWallet()">
         <i class="fas fa-wallet"></i> Connect Wallet
       </button>
       <div class="wallet-address" id="walletAddress"></div>
@@ -33,7 +290,6 @@
     <div class="post-container">
       <div class="post-image-container">
         <img src="https://i.imgur.com/muoYEIu.jpeg" class="post-image" alt="Post">
-        
         <div class="post-overlay">
           <h3 class="post-title">@faruser1</h3>
           <p class="post-description">Like this post to earn 1 COIN. Verify after liking.</p>
@@ -66,253 +322,55 @@
       </div>
     </div>
   </div>
-  
-  <!-- صفحه لیدربرد -->
-  <div class="page" id="leaderboard-page">
-    <div class="header">
-      <div class="add-order-btn" onclick="showPage('order-page')">
-        <i class="fas fa-plus"></i>
-      </div>
-      <button class="wallet-btn" id="connectWallet2">
-        <i class="fas fa-wallet"></i> Connect Wallet
-      </button>
-      <div class="wallet-address" id="walletAddress2"></div>
-    </div>
+
+  <!-- کدهای JavaScript اضافه شده -->
+  <script>
+    // کانکت کردن کیف پول
+    let walletAddress = '';
+
+    async function connectWallet() {
+      if (typeof window.ethereum !== 'undefined') {
+        try {
+          const provider = new ethers.BrowserProvider(window.ethereum);
+          const accounts = await provider.send("eth_requestAccounts", []);
+          walletAddress = accounts[0];
+          document.getElementById("walletAddress").textContent = walletAddress;
+
+          // فعال‌سازی SDK Farcaster
+          const sdk = new FarcasterFrameSDK({
+            walletAddress: walletAddress
+          });
+
+          sdk.actions.ready();  // نمایش آماده بودن فریم برای اجرا
+          console.log('Wallet connected: ', walletAddress);
+        } catch (error) {
+          console.error('Error connecting wallet: ', error);
+        }
+      } else {
+        alert('Please install MetaMask or another Ethereum wallet provider.');
+      }
+    }
+
+    // تغییر صفحات
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+      });
+      document.getElementById(pageId).classList.add('active');
+    }
     
-    <div class="post-container">
-      <div style="padding: 20px; width: 100%; max-width: 500px;">
-        <div class="leaderboard-item">
-          <div class="leaderboard-rank rank-1">1</div>
-          <div class="leaderboard-info">
-            <div class="leaderboard-name">@topuser1</div>
-            <div class="leaderboard-score">1,245 COINS</div>
-          </div>
-        </div>
-        
-        <div class="leaderboard-item">
-          <div class="leaderboard-rank rank-2">2</div>
-          <div class="leaderboard-info">
-            <div class="leaderboard-name">@topuser2</div>
-            <div class="leaderboard-score">1,120 COINS</div>
-          </div>
-        </div>
-        
-        <div class="leaderboard-item">
-          <div class="leaderboard-rank rank-3">3</div>
-          <div class="leaderboard-info">
-            <div class="leaderboard-name">@topuser3</div>
-            <div class="leaderboard-score">980 COINS</div>
-          </div>
-        </div>
-
-        <div class="leaderboard-item">
-          <div class="leaderboard-rank rank-other">4</div>
-          <div class="leaderboard-info">
-            <div class="leaderboard-name">@user4</div>
-            <div class="leaderboard-score">850 COINS</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- صفحه پروفایل -->
-  <div class="page" id="profile-page">
-    <div class="header">
-      <div class="add-order-btn" onclick="showPage('order-page')">
-        <i class="fas fa-plus"></i>
-      </div>
-      <button class="wallet-btn" id="connectWallet3">
-        <i class="fas fa-wallet"></i> Connect Wallet
-      </button>
-      <div class="wallet-address" id="walletAddress3"></div>
-    </div>
+    // عملکردهای دیگر دکمه‌ها
+    function skipPost() {
+      console.log('Post skipped');
+    }
     
-    <div class="profile-content">
-      <img src="https://i.imgur.com/ABCD5678.jpg" class="profile-avatar" alt="Profile">
-      <div class="profile-username">@yourusername</div>
-      
-      <div class="profile-stats">
-        <div class="stat-item">
-          <div class="stat-value">142</div>
-          <div class="stat-label">LIKES</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value">89</div>
-          <div class="stat-label">COINS</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value">23</div>
-          <div class="stat-label">POSTS</div>
-        </div>
-      </div>
-      
-      <div class="orders-title">Your Orders</div>
-      
-      <div class="order-item">
-        <div class="order-type">30 Likes Package</div>
-        <div class="order-details">
-          <span>Status: Completed</span>
-          <span>50 COINS</span>
-        </div>
-      </div>
-      
-      <div class="order-item">
-        <div class="order-type">20 Followers Package</div>
-        <div class="order-details">
-          <span>Status: In Progress</span>
-          <span>70 COINS</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- صفحه سفارشات -->
-  <div class="page" id="order-page">
-    <div class="header">
-      <button class="back-btn" onclick="goBack()">
-        <i class="fas fa-arrow-left"></i>
-      </button>
-      <button class="wallet-btn" id="connectWallet4">
-        <i class="fas fa-wallet"></i> Connect Wallet
-      </button>
-      <div class="wallet-address" id="walletAddress4"></div>
-    </div>
+    function viewPost() {
+      console.log('Viewing post');
+    }
     
-    <div class="packages-container">
-      <div class="package-item">
-        <div class="package-header">
-          <div class="package-title">30 Likes</div>
-          <div class="package-price">50 COINS</div>
-        </div>
-        <div class="package-details">
-          Get 30 real likes on your post. This will help boost your engagement and visibility.
-        </div>
-        <button class="package-btn" onclick="startOrder('30 Likes', 50, 'post')">
-          Order Now
-        </button>
-      </div>
-      
-      <div class="package-item">
-        <div class="package-header">
-          <div class="package-title">30 Followers</div>
-          <div class="package-price">70 COINS</div>
-        </div>
-        <div class="package-details">
-          Gain 30 real followers to your profile. Increase your audience and reach.
-        </div>
-        <button class="package-btn" onclick="startOrder('30 Followers', 70, 'profile')">
-          Order Now
-        </button>
-      </div>
-      
-      <div class="package-item">
-        <div class="package-header">
-          <div class="package-title">30 Comments</div>
-          <div class="package-price">50 COINS</div>
-        </div>
-        <div class="package-details">
-          Receive 30 genuine comments on your post. Improve engagement and interaction.
-        </div>
-        <button class="package-btn" onclick="startOrder('30 Comments', 50, 'post')">
-          Order Now
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- صفحه تکمیل سفارش -->
-  <div class="page" id="order-form-page">
-    <div class="header">
-      <button class="back-btn" onclick="showPage('order-page')">
-        <i class="fas fa-arrow-left"></i>
-      </button>
-      <button class="wallet-btn" id="connectWallet5">
-        <i class="fas fa-wallet"></i> Connect Wallet
-      </button>
-      <div class="wallet-address" id="walletAddress5"></div>
-    </div>
-    
-    <div class="order-form-container">
-      <h2 class="order-form-title" id="order-form-title">Complete Your Order</h2>
-      
-      <div class="form-group">
-        <label class="form-label" id="order-link-label">Post Link</label>
-        <input type="text" class="form-input" id="order-link" placeholder="https://warpcast.com/yourusername/0x123456">
-      </div>
-      
-      <div class="form-group">
-        <label class="form-label">Your Wallet Address</label>
-        <input type="text" class="form-input" id="wallet-address" readonly>
-      </div>
-      
-      <div class="form-group">
-        <label class="form-label">Package</label>
-        <input type="text" class="form-input" id="package-name" readonly>
-      </div>
-      
-      <div class="form-group">
-        <label class="form-label">Price</label>
-        <input type="text" class="form-input" id="package-price" readonly>
-      </div>
-      
-      <button class="submit-btn" id="submit-order-btn" onclick="submitOrder()">
-        Confirm Order
-      </button>
-    </div>
-  </div>
-  
-  <!-- نوار پایینی -->
-  <div class="tab-bar">
-    <div class="tab-btn active" onclick="showPage('home-page')">
-      <i class="fas fa-home"></i>
-      <span>Home</span>
-    </div>
-    <div class="tab-btn" onclick="showPage('leaderboard-page')">
-      <i class="fas fa-trophy"></i>
-      <span>Leaderboard</span>
-    </div>
-    <div class="tab-btn" onclick="showPage('profile-page')">
-      <i class="fas fa-user"></i>
-      <span>Profile</span>
-    </div>
-  </div>
-
-  <!-- صفحه قوانین اولیه -->
-  <div class="tutorial-overlay" id="tutorial-overlay">
-    <div class="tutorial-content">
-      <h2 class="tutorial-title">Before You Start</h2>
-      
-      <div class="rule-item">
-        <div class="rule-checkbox" id="rule1-checkbox" onclick="toggleRule(1)"></div>
-        <div class="rule-text">
-          You must have at least 20 followers to participate
-        </div>
-      </div>
-      
-      <div class="rule-item">
-        <div class="rule-checkbox" id="rule2-checkbox" onclick="toggleRule(2)"></div>
-        <div class="rule-text">
-          Don't interact too much to avoid being flagged as a bot
-        </div>
-      </div>
-      
-      <div class="rule-item">
-        <div class="rule-checkbox" id="rule3-checkbox" onclick="toggleRule(3)"></div>
-        <div class="rule-text">
-          I confirm that I'm a real human user
-        </div>
-      </div>
-      
-      <button class="tutorial-submit" id="tutorial-submit-btn" onclick="closeTutorial()">
-        I Understand, Let's Start
-      </button>
-    </div>
-  </div>
-
-  <!-- فایل‌های JavaScript -->
-  <script src="js/utils.js"></script>
-  <script src="js/wallet.js"></script>
-  <script src="js/main.js"></script>
+    function likePost() {
+      console.log('Post liked');
+    }
+  </script>
 </body>
 </html>
