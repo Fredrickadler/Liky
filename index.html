@@ -7,7 +7,6 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
   <style>
@@ -36,7 +35,8 @@
       overflow: hidden;
       position: relative;
     }
-
+    
+    /* هدر */
     .header {
       padding: 15px;
       display: flex;
@@ -99,7 +99,7 @@
       transform: scale(1.1);
       background: var(--primary-dark);
     }
-
+    
     /* انیمیشن ستاره‌ها */
     .stars {
       position: fixed;
@@ -124,7 +124,7 @@
       0% { transform: translate(0, 0); }
       100% { transform: translate(100px, -100vh); }
     }
-
+    
     /* صفحه اصلی */
     .page {
       flex: 1;
@@ -225,7 +225,7 @@
       border-radius: 3px;
       transition: width 0.5s ease;
     }
-
+    
     /* دکمه‌های عمل */
     .action-buttons {
       display: grid;
@@ -262,7 +262,7 @@
     .action-btn i {
       font-size: 20px;
     }
-
+    
     /* نوار پایینی */
     .tab-bar {
       display: flex;
@@ -284,6 +284,347 @@
       display: block;
       margin-bottom: 5px;
     }
+    
+    /* صفحه لیدربرد */
+    .leaderboard-item {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      background: var(--gray-800);
+      border-radius: 12px;
+      margin-bottom: 10px;
+      max-width: 500px;
+      width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .leaderboard-rank {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+      font-weight: 700;
+      border-radius: 50%;
+    }
+    .rank-1 {
+      background: var(--gold);
+      color: #000;
+      border: 2px solid var(--gold);
+    }
+    .rank-2 {
+      background: var(--silver);
+      color: #000;
+      border: 2px solid var(--silver);
+    }
+    .rank-3 {
+      background: var(--bronze);
+      color: #000;
+      border: 2px solid var(--bronze);
+    }
+    .rank-other {
+      background: transparent;
+      color: var(--gray-400);
+      border: 2px solid var(--gray-700);
+    }
+    .leaderboard-info {
+      flex: 1;
+    }
+    .leaderboard-name {
+      font-weight: 600;
+    }
+    .leaderboard-score {
+      color: var(--gray-200);
+      font-size: 14px;
+    }
+    
+    /* صفحه پروفایل */
+    .profile-content {
+      max-width: 500px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .profile-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 20px;
+      border: 3px solid var(--primary);
+    }
+    .profile-username {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 30px;
+    }
+    .profile-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 30px;
+      width: 100%;
+    }
+    .stat-item {
+      background: var(--gray-800);
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--gray-400);
+    }
+    .orders-title {
+      align-self: flex-start;
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: var(--gray-200);
+    }
+    .order-item {
+      background: var(--gray-800);
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+    .order-type {
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    .order-details {
+      display: flex;
+      justify-content: space-between;
+      color: var(--gray-400);
+      font-size: 14px;
+    }
+
+    /* صفحه سفارشات */
+    .packages-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 15px;
+      padding: 20px;
+      max-width: 500px;
+      margin: 0 auto;
+      width: 100%;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .package-item {
+      background: var(--gray-800);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid var(--primary);
+      transition: all 0.3s;
+    }
+    .package-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(138, 90, 255, 0.2);
+    }
+    .package-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .package-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .package-price {
+      background: var(--primary);
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    .package-details {
+      color: var(--gray-200);
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+    .package-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .package-btn:hover {
+      background: var(--primary-dark);
+    }
+
+    /* صفحه تکمیل سفارش */
+    .order-form-container {
+      max-width: 500px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px;
+      flex: 1;
+      overflow-y: auto;
+    }
+    .order-form-title {
+      font-size: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    .form-input {
+      width: 100%;
+      padding: 12px;
+      background: var(--gray-800);
+      border: 1px solid var(--gray-700);
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .submit-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 15px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 20px;
+    }
+    .submit-btn:hover {
+      background: var(--primary-dark);
+    }
+    .submit-btn.error {
+      background: var(--error);
+    }
+    .submit-btn.success {
+      background: var(--success);
+    }
+
+    /* صفحه قوانین اولیه */
+    .tutorial-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 15, 15, 0.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .tutorial-content {
+      background: var(--gray-800);
+      border-radius: 16px;
+      padding: 30px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .tutorial-title {
+      font-size: 24px;
+      margin-bottom: 20px;
+      text-align: center;
+      color: var(--primary);
+    }
+    .rule-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--gray-700);
+    }
+    .rule-checkbox {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--gray-400);
+      border-radius: 4px;
+      margin-right: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+    .rule-checkbox.checked {
+      background: var(--success);
+      border-color: var(--success);
+    }
+    .rule-checkbox.checked::after {
+      content: "✓";
+      color: white;
+    }
+    .rule-checkbox.error {
+      border-color: var(--error);
+    }
+    .rule-text {
+      flex: 1;
+    }
+    .tutorial-submit {
+      background: var(--primary);
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 15px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 20px;
+      display: none;
+    }
+    .tutorial-submit.active {
+      display: block;
+    }
+    .tutorial-submit:hover {
+      background: var(--primary-dark);
+    }
+
+    @media (max-width: 768px) {
+      .post-image-container {
+        height: 300px;
+      }
+      .profile-avatar {
+        width: 100px;
+        height: 100px;
+      }
+      .profile-username {
+        font-size: 20px;
+      }
+      .wallet-btn, .wallet-address {
+        padding: 10px 20px;
+        font-size: 14px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -296,7 +637,7 @@
       <div class="add-order-btn" onclick="showPage('order-page')">
         <i class="fas fa-plus"></i>
       </div>
-      <button class="wallet-btn" id="connectWallet" onclick="connectWallet()">
+      <button class="wallet-btn" id="connectWallet">
         <i class="fas fa-wallet"></i> Connect Wallet
       </button>
       <div class="wallet-address" id="walletAddress"></div>
@@ -305,12 +646,14 @@
     <div class="post-container">
       <div class="post-image-container">
         <img src="https://i.imgur.com/muoYEIu.jpeg" class="post-image" alt="Post">
+        <!-- <div class="no-photo">📷 NO PHOTO</div> -->
+        
         <div class="post-overlay">
           <h3 class="post-title">@faruser1</h3>
           <p class="post-description">Like this post to earn 1 COIN. Verify after liking.</p>
         </div>
       </div>
-
+      
       <div class="progress-container">
         <div class="progress-info">
           <span>65% completed</span>
@@ -337,82 +680,7 @@
       </div>
     </div>
   </div>
-
-  <div class="page" id="leaderboard-page"></div>
-  <div class="page" id="profile-page"></div>
-  <div class="page" id="order-page"></div>
-
-  <script>
-    let provider;
-    let signer;
-    
-    async function connectWallet() {
-      try {
-        if (window.ethereum) {
-          provider = new ethers.providers.Web3Provider(window.ethereum);
-          signer = provider.getSigner();
-          await provider.send("eth_requestAccounts", []);
-          const address = await signer.getAddress();
-          document.getElementById("walletAddress").innerText = address;
-          console.log("Connected:", address);
-          sdk.actions.ready();
-        } else {
-          alert("Please install MetaMask or another wallet provider.");
-        }
-      } catch (err) {
-        console.error("Connection failed:", err);
-      }
-    }
-
-    function showPage(pageId) {
-      document.querySelectorAll('.page').forEach(page => {
-        page.classList.remove('active');
-      });
-      document.getElementById(pageId).classList.add('active');
-    }
-
-    function skipPost() {
-      console.log("Post skipped");
-    }
-
-    function viewPost() {
-      console.log("Viewing post...");
-    }
-
-    function likePost() {
-      console.log("Post liked!");
-      sendNotification();
-    }
-
-    async function sendNotification() {
-      const token = "user-token";  
-      const url = "https://example.com";
-
-      const notificationData = {
-        notificationId: 'unique-id-123',
-        title: 'New Post Available',
-        body: 'Check out this new post!',
-        targetUrl: url,
-        tokens: [token],
-      };
-
-      const response = await fetch("https://example.com/send-notification", {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(notificationData),
-      });
-
-      if (response.ok) {
-        console.log('Notification sent successfully');
-      } else {
-        console.log('Failed to send notification');
-      }
-    }
-  </script>
-</body>
-</html>
+  
   <!-- صفحه لیدربرد -->
   <div class="page" id="leaderboard-page">
     <div class="header">
@@ -461,7 +729,7 @@
       </div>
     </div>
   </div>
-
+  
   <!-- صفحه پروفایل -->
   <div class="page" id="profile-page">
     <div class="header">
@@ -599,62 +867,284 @@
       
       <div class="form-group">
         <label class="form-label">Price</label>
-        <input type="text" class="form-input" id="price" readonly>
+        <input type="text" class="form-input" id="package-price" readonly>
       </div>
       
-      <button class="submit-btn" id="submit-btn" onclick="submitOrder()">Submit</button>
+      <button class="submit-btn" id="submit-order-btn" onclick="submitOrder()">
+        Confirm Order
+      </button>
+    </div>
+  </div>
+  
+  <!-- نوار پایینی -->
+  <div class="tab-bar">
+    <div class="tab-btn active" onclick="showPage('home-page')">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </div>
+    <div class="tab-btn" onclick="showPage('leaderboard-page')">
+      <i class="fas fa-trophy"></i>
+      <span>Leaderboard</span>
+    </div>
+    <div class="tab-btn" onclick="showPage('profile-page')">
+      <i class="fas fa-user"></i>
+      <span>Profile</span>
+    </div>
+  </div>
+
+  <!-- صفحه قوانین اولیه -->
+  <div class="tutorial-overlay" id="tutorial-overlay">
+    <div class="tutorial-content">
+      <h2 class="tutorial-title">Before You Start</h2>
+      
+      <div class="rule-item">
+        <div class="rule-checkbox" id="rule1-checkbox" onclick="toggleRule(1)"></div>
+        <div class="rule-text">
+          You must have at least 20 followers to participate
+        </div>
+      </div>
+      
+      <div class="rule-item">
+        <div class="rule-checkbox" id="rule2-checkbox" onclick="toggleRule(2)"></div>
+        <div class="rule-text">
+          Don't interact too much to avoid being flagged as a bot
+        </div>
+      </div>
+      
+      <div class="rule-item">
+        <div class="rule-checkbox" id="rule3-checkbox" onclick="toggleRule(3)"></div>
+        <div class="rule-text">
+          I confirm that I'm a real human user
+        </div>
+      </div>
+      
+      <button class="tutorial-submit" id="tutorial-submit-btn" onclick="closeTutorial()">
+        I Understand, Let's Start
+      </button>
     </div>
   </div>
 
   <script>
-    let provider;
-    let signer;
-
-    async function connectWallet() {
-      try {
-        if (window.ethereum) {
-          provider = new ethers.providers.Web3Provider(window.ethereum);
-          signer = provider.getSigner();
-          await provider.send("eth_requestAccounts", []);
-          const address = await signer.getAddress();
-          document.getElementById("walletAddress").innerText = address;
-        } else {
-          alert("Please install MetaMask or another wallet provider.");
-        }
-      } catch (err) {
-        console.error("Connection failed:", err);
+    // ایجاد ستاره‌های متحرک
+    function createStars() {
+      const starsContainer = document.getElementById('stars');
+      for (let i = 0; i < 100; i++) {
+        const star = document.createElement('div');
+        star.classList.add('star');
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.width = `${Math.random() * 3 + 1}px`;
+        star.style.height = star.style.width;
+        star.style.animationDelay = `${Math.random() * 3}s`;
+        star.style.animationDuration = `${Math.random() * 30 + 20}s`;
+        starsContainer.appendChild(star);
       }
     }
 
+    // اتصال کیف پول
+    let provider, signer, address;
+    let currentOrder = null;
+    let rulesAccepted = false;
+
+    function setupWalletConnection(connectBtnId, addressId) {
+      const connectBtn = document.getElementById(connectBtnId);
+      const walletAddress = document.getElementById(addressId);
+
+      connectBtn.addEventListener('click', async () => {
+        try {
+          if (window.ethereum) {
+            provider = new ethers.BrowserProvider(window.ethereum);
+            await provider.send("eth_requestAccounts", []);
+            signer = await provider.getSigner();
+            address = await signer.getAddress();
+
+            connectBtn.style.display = 'none';
+            walletAddress.style.display = 'block';
+            walletAddress.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
+          } else {
+            alert('Please install MetaMask or another Ethereum wallet.');
+          }
+        } catch (error) {
+          console.error("Wallet connection failed:", error);
+        }
+      });
+
+      walletAddress.addEventListener('click', () => {
+        connectBtn.style.display = 'inline-block';
+        walletAddress.style.display = 'none';
+        signer = null;
+        address = null;
+      });
+    }
+
+    // نمایش صفحات
+    let currentPage = 'home-page';
+    let previousPage = 'home-page';
+
     function showPage(pageId) {
+      previousPage = currentPage;
+      currentPage = pageId;
+      
       document.querySelectorAll('.page').forEach(page => {
         page.classList.remove('active');
       });
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
       document.getElementById(pageId).classList.add('active');
+      
+      // فقط تب‌های اصلی را فعال کنید (نه صفحه سفارشات)
+      if (['home-page', 'leaderboard-page', 'profile-page'].includes(pageId)) {
+        const tabBtn = document.querySelector(`.tab-btn[onclick="showPage('${pageId}')"]`);
+        if (tabBtn) tabBtn.classList.add('active');
+      }
     }
 
     function goBack() {
-      showPage('order-page');
+      showPage(previousPage);
+    }
+    
+    // عملیات پست
+    function skipPost() {
+      alert('Post skipped! Loading next...');
+      // در اینجا می‌توانید پست بعدی را بارگذاری کنید
+    }
+    
+    function viewPost() {
+      window.open('https://warpcast.com/faruser1/0x0a6d75f4', '_blank');
+    }
+    
+    function likePost() {
+      const confirmed = confirm('Did you like this post on Warpcast?');
+      if (confirmed) {
+        alert('+1 COIN earned!');
+      } else {
+        alert('Please like the post first!');
+      }
     }
 
-    function startOrder(packageName, price, type) {
-      document.getElementById('package-name').value = packageName;
-      document.getElementById('price').value = price;
+    // شروع سفارش جدید
+    function startOrder(type, coins, inputType) {
+      if (!address) {
+        alert('Please connect your wallet first!');
+        return;
+      }
+      
+      currentOrder = { type, coins, inputType };
+      document.getElementById('order-form-title').textContent = `Order: ${type}`;
+      document.getElementById('package-name').value = type;
+      document.getElementById('package-price').value = `${coins} COINS`;
+      document.getElementById('wallet-address').value = address;
+      
+      if (inputType === 'post') {
+        document.getElementById('order-link-label').textContent = 'Post Link';
+        document.getElementById('order-link').placeholder = 'https://warpcast.com/yourusername/0x123456';
+      } else {
+        document.getElementById('order-link-label').textContent = 'Profile Link';
+        document.getElementById('order-link').placeholder = 'https://warpcast.com/yourusername';
+      }
+      
       showPage('order-form-page');
     }
 
+    // ثبت سفارش
     function submitOrder() {
-      const postLink = document.getElementById('order-link').value;
-      const walletAddress = document.getElementById('wallet-address').value;
-      const packageName = document.getElementById('package-name').value;
-      const price = document.getElementById('price').value;
-
-      console.log(`Order Submitted: 
-        Post Link: ${postLink}, 
-        Wallet Address: ${walletAddress}, 
-        Package: ${packageName}, 
-        Price: ${price}`);
+      const link = document.getElementById('order-link').value.trim();
+      const submitBtn = document.getElementById('submit-order-btn');
+      
+      if (!link) {
+        submitBtn.textContent = 'Please enter a valid link';
+        submitBtn.classList.add('error');
+        setTimeout(() => {
+          submitBtn.textContent = 'Confirm Order';
+          submitBtn.classList.remove('error');
+        }, 2000);
+        return;
+      }
+      
+      // در اینجا می‌توانید بررسی کنید که آیا کاربر سکه کافی دارد یا نه
+      const hasEnoughCoins = true; // این را از بک‌اند چک کنید
+      
+      if (!hasEnoughCoins) {
+        submitBtn.textContent = 'Not enough coins!';
+        submitBtn.classList.add('error');
+        setTimeout(() => {
+          submitBtn.textContent = 'Confirm Order';
+          submitBtn.classList.remove('error');
+        }, 2000);
+        return;
+      }
+      
+      // اگر همه چیز درست بود
+      submitBtn.textContent = 'Order Submitted!';
+      submitBtn.classList.add('success');
+      
+      // در اینجا می‌توانید سفارش را به بک‌اند ارسال کنید
+      setTimeout(() => {
+        showPage('profile-page');
+        submitBtn.textContent = 'Confirm Order';
+        submitBtn.classList.remove('success');
+      }, 2000);
     }
+
+    // قوانین اولیه
+    function toggleRule(ruleNumber) {
+      const checkbox = document.getElementById(`rule${ruleNumber}-checkbox`);
+      checkbox.classList.toggle('checked');
+      
+      // بررسی اینکه آیا همه قوانین پذیرفته شده‌اند
+      const allRulesAccepted = 
+        document.getElementById('rule1-checkbox').classList.contains('checked') &&
+        document.getElementById('rule2-checkbox').classList.contains('checked') &&
+        document.getElementById('rule3-checkbox').classList.contains('checked');
+      
+      if (allRulesAccepted) {
+        document.getElementById('tutorial-submit-btn').classList.add('active');
+        rulesAccepted = true;
+      } else {
+        document.getElementById('tutorial-submit-btn').classList.remove('active');
+        rulesAccepted = false;
+      }
+    }
+
+    function closeTutorial() {
+      if (rulesAccepted) {
+        document.getElementById('tutorial-overlay').style.display = 'none';
+        // ذخیره در localStorage که کاربر قبلاً قوانین را پذیرفته است
+        localStorage.setItem('tutorialAccepted', 'true');
+      }
+    }
+
+    // بارگذاری اولیه
+    window.addEventListener('DOMContentLoaded', () => {
+      createStars();
+      
+      setupWalletConnection('connectWallet', 'walletAddress');
+      setupWalletConnection('connectWallet2', 'walletAddress2');
+      setupWalletConnection('connectWallet3', 'walletAddress3');
+      setupWalletConnection('connectWallet4', 'walletAddress4');
+      setupWalletConnection('connectWallet5', 'walletAddress5');
+      
+      // شبیه‌سازی تغییر نوع دکمه عمل
+      setTimeout(() => {
+        const actionBtn = document.querySelector('.action-buttons .action-btn.primary');
+        actionBtn.innerHTML = '<i class="fas fa-user-plus"></i><span>FOLLOW</span>';
+        actionBtn.onclick = function() {
+          const confirmed = confirm('Did you follow this user on Warpcast?');
+          if (confirmed) {
+            alert('+2 COINS earned!');
+          } else {
+            alert('Please follow the user first!');
+          }
+        };
+      }, 3000);
+      
+      // نمایش صفحه قوانین اگر اولین بار است که وارد می‌شود
+      if (!localStorage.getItem('tutorialAccepted')) {
+        document.getElementById('tutorial-overlay').style.display = 'flex';
+      }
+    });
   </script>
 </body>
 </html>
