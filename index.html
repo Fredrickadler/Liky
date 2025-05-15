@@ -1,104 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Liky Mini App</title>
+
+  <!-- Font and Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Farcaster Meta -->
   <meta name="fc:frame" content='{
-    "version": "next",
-    "imageUrl": "https://example.com/img/start.png",
-    "button": {
-      "title": "Launch Liky",
-      "action": {
-        "type": "launch_frame",
-        "name": "Liky!",
-        "url": "https://liky-omega.vercel.app",
-        "splashImageUrl": "https://example.com/img/splash.png",
-        "splashBackgroundColor": "#eeeee4"
+    "version":"next",
+    "imageUrl":"https://i.imgur.com/EfP517b.jpeg",
+    "button":{
+      "title":"Liky Mini App",
+      "action":{
+        "type":"launch_frame",
+        "url":"https://liky-omega.vercel.app",
+        "name":"Liky!",
+        "splashImageUrl":"https://i.imgur.com/oxfooj0_d.webp?maxwidth=760&fidelity=grand",
+        "splashBackgroundColor":"#8A5AFF"
       }
     }
   }' />
-  <title>Liky Mini App</title>
 
-  <!-- Farcaster SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
+    /* Global Styles */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Space Grotesk', sans-serif; }
+    body { background-color: #0F0F0F; color: white; min-height: 100vh; overflow-x: hidden; }
+
+    /* Container */
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+    /* Header */
+    header { display: flex; justify-content: flex-end; padding: 24px 0; }
+    .wallet-btn {
+      background: #8A5AFF; color: white; border: none; padding: 12px 24px;
+      border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 15px;
+      transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;
     }
 
-    #app {
-      max-width: 400px;
-      margin: auto;
+    .wallet-btn:hover { background: #6E3AFF; transform: translateY(-2px); }
+    .wallet-btn i { font-size: 16px; }
+
+    .wallet-address {
+      background: #1A1A1A; padding: 10px 20px; border-radius: 12px;
+      font-size: 14px; font-weight: 500; display: none;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); cursor: pointer;
     }
 
-    button {
-      padding: 10px 20px;
-      margin: 10px;
-      font-size: 16px;
-      cursor: pointer;
+    /* Content */
+    .main-content { display: flex; flex-direction: column; align-items: center; padding: 40px 0; }
+    .nft-card { width: 100%; max-width: 420px; margin-bottom: 40px; position: relative; overflow: hidden; border-radius: 16px; }
+    .nft-image { width: 100%; height: auto; object-fit: cover; transition: transform 0.5s ease; }
+    .nft-card:hover .nft-image { transform: scale(1.03); }
+
+    .nft-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0, 0, 0, 0.8); padding: 24px; color: white; }
+    .nft-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+    .nft-description { font-size: 15px; color: #E5E5E5; opacity: 0.9; line-height: 1.5; }
+
+    /* Mint Section */
+    .mint-section { width: 100%; max-width: 420px; text-align: center; }
+    .mint-btn {
+      background: #8A5AFF; color: white; border: none;
+      padding: 16px; border-radius: 12px; cursor: pointer;
+      font-weight: 600; font-size: 16px; transition: all 0.3s ease;
+      width: 100%;
     }
+
+    .mint-btn:hover { background: #6E3AFF; transform: translateY(-3px); }
+    .mint-price { margin-top: 12px; font-size: 14px; color: #A0A0A0; }
   </style>
 </head>
-
 <body>
-  <div id="app">
-    <h1>Welcome to Liky Mini App!</h1>
-    <button id="connectWallet">Connect Wallet</button>
-    <button id="sendNotification">Send Notification</button>
+  <div class="container">
+    <header>
+      <button class="wallet-btn" id="connectWallet">
+        <i class="fas fa-wallet"></i> Connect Wallet
+      </button>
+      <div class="wallet-address" id="walletAddress"></div>
+    </header>
+
+    <main class="main-content">
+      <div class="nft-card">
+        <img src="https://i.imgur.com/muoYEIu.jpeg" alt="Exclusive NFT" class="nft-image">
+        <div class="nft-overlay">
+          <h1 class="nft-title">Cosmic Fragment #44</h1>
+          <p class="nft-description">
+            A unique piece of digital art, crafted with cosmic energy and rare stardust. Own a fragment of the universe.
+          </p>
+        </div>
+      </div>
+
+      <div class="mint-section">
+        <button class="mint-btn" id="mintButton">MINT NOW</button>
+        <div class="mint-price">Price: 0.00044 ETH</div>
+      </div>
+    </main>
   </div>
 
-  <script>
-    const sdk = window.FarcasterSDK;
+  <!-- JavaScript for SDK and Wallet connection -->
+  <script type="module">
+    import sdk from 'https://esm.sh/@farcaster/frame-sdk';
 
-    // Function to connect wallet
-    document.getElementById('connectWallet').addEventListener('click', async () => {
+    window.addEventListener('DOMContentLoaded', async () => {
       try {
-        // Request to connect wallet
-        const accounts = await sdk.wallet.ethProvider.request({ method: 'eth_requestAccounts' });
-        if (accounts.length > 0) {
-          alert('Wallet connected!');
+        await sdk.actions.ready();
+        const context = await sdk.context;
+        console.log("Farcaster context:", context);
+      } catch (err) {
+        console.error("Farcaster SDK error:", err);
+      }
+    });
+
+    let provider, signer, address;
+    const connectWallet = document.getElementById('connectWallet');
+    const walletAddress = document.getElementById('walletAddress');
+
+    connectWallet.addEventListener('click', async () => {
+      try {
+        if (window.sdk?.wallet?.ethProvider) {
+          provider = new ethers.BrowserProvider(window.sdk.wallet.ethProvider);
+          await provider.send("eth_requestAccounts", []);
+          signer = await provider.getSigner();
+          address = await signer.getAddress();
+
+          connectWallet.style.display = 'none';
+          walletAddress.style.display = 'block';
+          walletAddress.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
+        } else {
+          alert('Please open this app inside Warpcast to connect your wallet.');
         }
-      } catch (err) {
-        console.error('Error connecting wallet:', err);
-        alert('Failed to connect wallet');
+      } catch (error) {
+        console.error("Wallet connection failed:", error);
       }
     });
 
-    // Function to send notification
-    document.getElementById('sendNotification').addEventListener('click', async () => {
+    // Mint button functionality
+    const mintButton = document.getElementById('mintButton');
+    mintButton.addEventListener('click', async () => {
+      if (!window.sdk?.wallet?.ethProvider) {
+        alert('Please open this app inside Warpcast to connect your wallet.');
+        return;
+      }
+
       try {
-        const notificationDetails = {
-          notificationId: 'notif-1234',
-          title: 'New Update on Liky!',
-          body: 'Check out the new features in Liky!',
-          targetUrl: 'https://liky-omega.vercel.app',
-          tokens: ['token_1', 'token_2']  // Tokens will be unique for each user, you need to get these from the Farcaster app
-        };
+        const ethProvider = window.sdk.wallet.ethProvider;
+        const signerProvider = new ethers.BrowserProvider(ethProvider);
+        const signer = await signerProvider.getSigner();
+        const address = await signer.getAddress();
 
-        // Send notification (you should configure this based on the Farcaster notification system)
-        await fetch('https://example.com/send-notification', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(notificationDetails),
-        });
+        const abi = [
+          { "inputs": [], "name": "claim", "outputs": [], "stateMutability": "payable", "type": "function" },
+          { "inputs": [], "name": "price", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
+          { "inputs": [], "name": "getRemainingNFTs", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }
+        ];
 
-        alert('Notification sent!');
+        const contractAddress = '0x9434006c47C54F04ab81d7343131a64032481b4e';
+        const contract = new ethers.Contract(contractAddress, abi, signer);
+
+        const remainingNFTs = await contract.getRemainingNFTs();
+        if (remainingNFTs.toNumber() <= 0) {
+          alert("No NFTs left to mint.");
+          return;
+        }
+
+        const price = await contract.price();
+        if (price > 0) {
+          const txResponse = await contract.claim({ value: price });
+          console.log('Transaction sent:', txResponse.hash);
+          alert('Transaction submitted!');
+        } else {
+          alert('Price is not valid.');
+        }
+
       } catch (err) {
-        console.error('Error sending notification:', err);
-        alert('Failed to send notification');
+        console.error('Minting failed:', err);
+        alert('Transaction failed:\n' + (err?.message || JSON.stringify(err)));
       }
-    });
-
-    // Indicate that the frame is ready
-    sdk.actions.ready().then(() => {
-      console.log('Frame is ready!');
-    }).catch((error) => {
-      console.error('Error while preparing the frame:', error);
     });
   </script>
 </body>
-
 </html>
