@@ -8,15 +8,15 @@
   <!-- Farcaster Meta -->
   <meta name="fc:frame" content='{
     "version":"next",
-    "imageUrl":"https://i.imgur.com/UxZ1DqS_d.webp?maxwidth=1520&fidelity=grand",
+    "imageUrl":"https://i.imgur.com/EfP517b.jpeg",
     "button":{
       "title":"Liky Mini App",
       "action":{
         "type":"launch_frame",
         "url":"https://liky-omega.vercel.app",
         "name":"Liky!",
-        "splashImageUrl":"https://i.imgur.com/nyI4nlz_d.webp?maxwidth=1520&fidelity=grand",
-        "splashBackgroundColor":"#2E2E2E"
+        "splashImageUrl":"https://i.imgur.com/oxfooj0_d.webp?maxwidth=760&fidelity=grand",
+        "splashBackgroundColor":"#8A5AFF"
       }
     }
   }' />
@@ -60,6 +60,35 @@
       flex-direction: column;
       overflow: hidden;
       position: relative;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    /* Loading Overlay */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--gray-900);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--gray-700);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
     /* Header Styles */
@@ -303,33 +332,48 @@
     .tab-bar {
       display: flex;
       background: var(--gray-800);
+      height: 60px;
     }
 
     .tab-btn {
       flex: 1;
-      padding: 15px;
-      text-align: center;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
       color: var(--gray-400);
       cursor: pointer;
       transition: all 0.3s;
     }
 
+    .tab-btn i {
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .tab-btn span {
+      font-size: 12px;
+      font-weight: 500;
+    }
+
     .tab-btn.active {
       color: var(--primary);
+      background: rgba(138, 90, 255, 0.1);
     }
 
     /* Leaderboard Page */
     .leaderboard-item {
       display: flex;
       align-items: center;
-      padding: 15px;
+      padding: 12px;
       background: var(--gray-800);
       border-radius: 12px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       max-width: 500px;
       width: 100%;
-      margin-left: auto;
-      margin-right: auto;
+      gap: 12px;
     }
 
     .leaderboard-rank {
@@ -338,19 +382,41 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-right: 15px;
       font-weight: 700;
-      border-radius: 50%;
+      border-radius: 8px;
+      font-size: 16px;
+      flex-shrink: 0;
     }
 
-    .rank-1 { background: var(--gold); color: #000; border: 2px solid var(--gold); }
-    .rank-2 { background: var(--silver); color: #000; border: 2px solid var(--silver); }
-    .rank-3 { background: var(--bronze); color: #000; border: 2px solid var(--bronze); }
-    .rank-other { background: transparent; color: var(--gray-400); border: 2px solid var(--gray-700); }
+    .rank-1 { background: var(--gold); color: #000; }
+    .rank-2 { background: var(--silver); color: #000; }
+    .rank-3 { background: var(--bronze); color: #000; }
+    .rank-other { background: var(--gray-700); }
 
-    .leaderboard-info { flex: 1; }
-    .leaderboard-name { font-weight: 600; }
-    .leaderboard-score { color: var(--gray-200); font-size: 14px; }
+    .leaderboard-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .leaderboard-name {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .leaderboard-score {
+      color: var(--gray-200);
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .leaderboard-score::before {
+      content: "🪙";
+      font-size: 14px;
+    }
 
     /* Profile Page */
     .profile-content {
@@ -590,6 +656,7 @@
       align-items: center;
       justify-content: center;
       transition: all 0.3s;
+      flex-shrink: 0;
     }
 
     .rule-checkbox.checked {
@@ -600,6 +667,7 @@
     .rule-checkbox.checked::after {
       content: "✓";
       color: white;
+      font-size: 16px;
     }
 
     .tutorial-submit {
@@ -628,6 +696,11 @@
   </style>
 </head>
 <body>
+  <!-- Loading Screen -->
+  <div class="loading-overlay" id="loading">
+    <div class="loading-spinner"></div>
+  </div>
+
   <!-- Star Animation -->
   <div class="stars" id="stars"></div>
 
@@ -922,23 +995,39 @@
     </div>
   </div>
 
-  <script>
-    // Initialize Farcaster SDK
-    window.addEventListener('DOMContentLoaded', async () => {
+  <script type="module">
+    import sdk from 'https://esm.sh/@farcaster/frame-sdk';
+
+    let provider, signer, address;
+    let currentPage = 'home-page';
+    let previousPage = 'home-page';
+    let currentOrder = null;
+
+    // Initialize App
+    document.addEventListener('DOMContentLoaded', async () => {
       try {
         await sdk.actions.ready();
         const context = await sdk.context;
-        console.log("Farcaster context:", context);
-      } catch (err) {
-        console.error("Farcaster SDK error:", err);
-      }
-
-      createStars();
-      setupWalletConnections();
-      if (!localStorage.getItem('tutorialAccepted')) {
-        document.getElementById('tutorial-overlay').style.display = 'flex';
+        console.log("Farcaster Ready:", context);
+        
+        initializeApp();
+        document.body.style.opacity = 1;
+        document.getElementById('loading').style.display = 'none';
+        
+        if (!localStorage.getItem('tutorialAccepted')) {
+          document.getElementById('tutorial-overlay').style.display = 'flex';
+        }
+      } catch (error) {
+        console.error("Initialization Error:", error);
+        document.getElementById('loading').style.display = 'none';
+        document.body.innerHTML = `<div class="error">Failed to initialize. Please refresh.</div>`;
       }
     });
+
+    function initializeApp() {
+      createStars();
+      setupWalletConnections();
+    }
 
     // Star Animation
     function createStars() {
@@ -956,9 +1045,7 @@
       }
     }
 
-    // Wallet Connection
-    let provider, signer, address;
-
+    // Wallet Connections
     function setupWalletConnections() {
       document.querySelectorAll('.wallet-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
@@ -985,9 +1072,6 @@
     }
 
     // Page Navigation
-    let currentPage = 'home-page';
-    let previousPage = 'home-page';
-
     function showPage(pageId) {
       previousPage = currentPage;
       currentPage = pageId;
@@ -1012,8 +1096,6 @@
     function likePost() { confirm('Did you like this post?') ? alert('+1 COIN!') : alert('Please like first!'); }
 
     // Order System
-    let currentOrder = null;
-
     function startOrder(type, coins, inputType) {
       if (!address) return alert('Connect wallet first!');
       
