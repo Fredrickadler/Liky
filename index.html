@@ -1059,5 +1059,100 @@
       } else {
         document.getElementById('order-link-label').textContent = 'Profile Link';
         document.getElementById('order-link').placeholder = 'https://warpcast.com/yourusername';
-      }
-      
+    }
+    
+    showPage('order-form-page');
+  }
+
+  // ثبت سفارش
+  function submitOrder() {
+    const link = document.getElementById('order-link').value.trim();
+    const submitBtn = document.getElementById('submit-order-btn');
+    
+    if (!link) {
+      submitBtn.textContent = 'Please enter a valid link';
+      submitBtn.classList.add('error');
+      setTimeout(() => {
+        submitBtn.textContent = 'Confirm Order';
+        submitBtn.classList.remove('error');
+      }, 2000);
+      return;
+    }
+    
+    // ارسال نوتیفیکیشن از طریق Farcaster SDK
+    farcasterSDK.actions.sendNotification({
+      title: "New Order Placed!",
+      message: `Order Type: ${currentOrder.type}`,
+      icon: "https://i.imgur.com/muoYEIu.jpeg",
+      url: window.location.href
+    }).then(() => {
+      submitBtn.textContent = 'Order Submitted!';
+      submitBtn.classList.add('success');
+      setTimeout(() => showPage('profile-page'), 2000);
+    }).catch(err => {
+      console.error("Notification failed:", err);
+      submitBtn.textContent = 'Error! Try Again';
+      submitBtn.classList.add('error');
+    });
+  }
+
+  // قوانین اولیه
+  function toggleRule(ruleNumber) {
+    const checkbox = document.getElementById(`rule${ruleNumber}-checkbox`);
+    checkbox.classList.toggle('checked');
+    
+    const allRulesAccepted = 
+      document.getElementById('rule1-checkbox').classList.contains('checked') &&
+      document.getElementById('rule2-checkbox').classList.contains('checked') &&
+      document.getElementById('rule3-checkbox').classList.contains('checked');
+    
+    document.getElementById('tutorial-submit-btn').classList.toggle('active', allRulesAccepted);
+  }
+
+  function closeTutorial() {
+    if(document.getElementById('tutorial-submit-btn').classList.contains('active')) {
+      document.getElementById('tutorial-overlay').style.display = 'none';
+      localStorage.setItem('tutorialAccepted', 'true');
+    }
+  }
+
+  // مقداردهی اولیه
+  window.addEventListener('DOMContentLoaded', () => {
+    createStars();
+    
+    // اتصال کلیه دکمه‌های کیف پول
+    document.querySelectorAll('.wallet-btn').forEach(btn => {
+      btn.addEventListener('click', connectWallet);
+    });
+
+    // مدیریت برگشت کیف پول
+    document.querySelectorAll('.wallet-address').forEach(el => {
+      el.addEventListener('click', disconnectWallet);
+    });
+
+    // شبیه‌سازی تغییر نوع دکمه عمل
+    setTimeout(() => {
+      const actionBtn = document.querySelector('.action-buttons .action-btn.primary');
+      actionBtn.innerHTML = '<i class="fas fa-user-plus"></i><span>FOLLOW</span>';
+      actionBtn.onclick = function() {
+        const confirmed = confirm('Did you follow this user on Warpcast?');
+        if (confirmed) {
+          alert('+2 COINS earned!');
+          farcasterSDK.actions.logEvent('follow-action');
+        } else {
+          alert('Please follow the user first!');
+        }
+      };
+    }, 3000);
+    
+    // نمایش صفحه قوانین اگر اولین بار است
+    if (!localStorage.getItem('tutorialAccepted')) {
+      document.getElementById('tutorial-overlay').style.display = 'flex';
+    }
+
+    // فعال‌سازی Farcaster
+    farcasterSDK.actions.ready();
+  });
+</script>
+</body>
+</html>
