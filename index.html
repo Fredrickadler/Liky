@@ -8,15 +8,15 @@
   <!-- Farcaster Meta -->
   <meta name="fc:frame" content='{
     "version":"next",
-    "imageUrl":"https://i.imgur.com/UxZ1DqS_d.webp?maxwidth=1520&fidelity=grand",
+    "imageUrl":"https://i.imgur.com/EfP517b.jpeg",
     "button":{
       "title":"Liky Mini App",
       "action":{
         "type":"launch_frame",
         "url":"https://liky-omega.vercel.app",
         "name":"Liky!",
-        "splashImageUrl":"https://i.imgur.com/nyI4nlz_d.webp?maxwidth=1520&fidelity=grand",
-        "splashBackgroundColor":"#2E2E2E"
+        "splashImageUrl":"https://i.imgur.com/oxfooj0_d.webp?maxwidth=760&fidelity=grand",
+        "splashBackgroundColor":"#8A5AFF"
       }
     }
   }' />
@@ -688,7 +688,44 @@
     .tutorial-submit:hover { background: var(--primary-dark); }
 
     @media (max-width: 768px) {
+      .post-image-container { height: 300px; }
+      .profile-avatar { width: 100px; height: 100px; }
+      .profile-username { font-size: 20px; }
+      .wallet-btn, .wallet-address { padding: 10px 20px; font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div class="loading-overlay" id="loading">
+    <div class="loading-spinner"></div>
+  </div>
+
+  <!-- Star Animation -->
+  <div class="stars" id="stars"></div>
+
+  <!-- Home Page -->
+  <div class="page active" id="home-page">
+    <div class="header">
+      <div class="add-order-btn" onclick="showPage('order-page')">
+        <i class="fas fa-plus"></i>
+      </div>
+      <button class="wallet-btn" id="connectWallet">
+        <i class="fas fa-wallet"></i> Connect Wallet
+      </button>
+      <div class="wallet-address" id="walletAddress"></div>
+    </div>
+    
+    <div class="post-container">
+      <div class="post-image-container">
+        <img src="https://i.imgur.com/muoYEIu.jpeg" class="post-image" alt="Post">
+        <div class="post-overlay">
+          <h3 class="post-title">@faruser1</h3>
+          <p class="post-description">Like this post to earn 1 COIN. Verify after liking.</p>
+        </div>
+      </div>
       
+      <div class="progress-container">
         <div class="progress-info">
           <span>65% completed</span>
           <span>142/220 likes</span>
@@ -767,6 +804,34 @@
   <!-- Profile Page -->
   <div class="page" id="profile-page">
     <div class="header">
+      <div class="add-order-btn" onclick="showPage('order-page')">
+        <i class="fas fa-plus"></i>
+      </div>
+      <button class="wallet-btn" id="connectWallet3">
+        <i class="fas fa-wallet"></i> Connect Wallet
+      </button>
+      <div class="wallet-address" id="walletAddress3"></div>
+    </div>
+    
+    <div class="profile-content">
+      <img src="https://i.imgur.com/ABCD5678.jpg" class="profile-avatar" alt="Profile">
+      <div class="profile-username">@yourusername</div>
+      
+      <div class="profile-stats">
+        <div class="stat-item">
+          <div class="stat-value">142</div>
+          <div class="stat-label">LIKES</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">89</div>
+          <div class="stat-label">COINS</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">23</div>
+          <div class="stat-label">POSTS</div>
+        </div>
+      </div>
+      
       <div class="orders-title">Your Orders</div>
       
       <div class="order-item">
