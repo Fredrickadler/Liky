@@ -5,10 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Liky Mini App</title>
 
-  <!-- Font and Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.umd.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Farcaster SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk"></script>
 
   <!-- Farcaster Meta -->
   <meta name="fc:frame" content='{
@@ -31,9 +29,6 @@
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Space Grotesk', sans-serif; }
     body { background-color: #0F0F0F; color: white; min-height: 100vh; overflow-x: hidden; }
 
-    /* Container */
-    .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
-
     /* Header */
     header { display: flex; justify-content: flex-end; padding: 24px 0; }
     .wallet-btn {
@@ -53,25 +48,6 @@
 
     /* Content */
     .main-content { display: flex; flex-direction: column; align-items: center; padding: 40px 0; }
-    .nft-card { width: 100%; max-width: 420px; margin-bottom: 40px; position: relative; overflow: hidden; border-radius: 16px; }
-    .nft-image { width: 100%; height: auto; object-fit: cover; transition: transform 0.5s ease; }
-    .nft-card:hover .nft-image { transform: scale(1.03); }
-
-    .nft-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0, 0, 0, 0.8); padding: 24px; color: white; }
-    .nft-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
-    .nft-description { font-size: 15px; color: #E5E5E5; opacity: 0.9; line-height: 1.5; }
-
-    /* Mint Section */
-    .mint-section { width: 100%; max-width: 420px; text-align: center; }
-    .mint-btn {
-      background: #8A5AFF; color: white; border: none;
-      padding: 16px; border-radius: 12px; cursor: pointer;
-      font-weight: 600; font-size: 16px; transition: all 0.3s ease;
-      width: 100%;
-    }
-
-    .mint-btn:hover { background: #6E3AFF; transform: translateY(-3px); }
-    .mint-price { margin-top: 12px; font-size: 14px; color: #A0A0A0; }
   </style>
 </head>
 <body>
@@ -84,19 +60,8 @@
     </header>
 
     <main class="main-content">
-      <div class="nft-card">
-        <img src="https://i.imgur.com/muoYEIu.jpeg" alt="Exclusive NFT" class="nft-image">
-        <div class="nft-overlay">
-          <h1 class="nft-title">Cosmic Fragment #44</h1>
-          <p class="nft-description">
-            A unique piece of digital art, crafted with cosmic energy and rare stardust. Own a fragment of the universe.
-          </p>
-        </div>
-      </div>
-
-      <div class="mint-section">
-        <button class="mint-btn" id="mintButton">MINT NOW</button>
-        <div class="mint-price">Price: 0.00044 ETH</div>
+      <div>
+        <h1>Welcome to Liky Mini App!</h1>
       </div>
     </main>
   </div>
@@ -135,50 +100,6 @@
         }
       } catch (error) {
         console.error("Wallet connection failed:", error);
-      }
-    });
-
-    // Mint button functionality
-    const mintButton = document.getElementById('mintButton');
-    mintButton.addEventListener('click', async () => {
-      if (!window.sdk?.wallet?.ethProvider) {
-        alert('Please open this app inside Warpcast to connect your wallet.');
-        return;
-      }
-
-      try {
-        const ethProvider = window.sdk.wallet.ethProvider;
-        const signerProvider = new ethers.BrowserProvider(ethProvider);
-        const signer = await signerProvider.getSigner();
-        const address = await signer.getAddress();
-
-        const abi = [
-          { "inputs": [], "name": "claim", "outputs": [], "stateMutability": "payable", "type": "function" },
-          { "inputs": [], "name": "price", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
-          { "inputs": [], "name": "getRemainingNFTs", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }
-        ];
-
-        const contractAddress = '0x9434006c47C54F04ab81d7343131a64032481b4e';
-        const contract = new ethers.Contract(contractAddress, abi, signer);
-
-        const remainingNFTs = await contract.getRemainingNFTs();
-        if (remainingNFTs.toNumber() <= 0) {
-          alert("No NFTs left to mint.");
-          return;
-        }
-
-        const price = await contract.price();
-        if (price > 0) {
-          const txResponse = await contract.claim({ value: price });
-          console.log('Transaction sent:', txResponse.hash);
-          alert('Transaction submitted!');
-        } else {
-          alert('Price is not valid.');
-        }
-
-      } catch (err) {
-        console.error('Minting failed:', err);
-        alert('Transaction failed:\n' + (err?.message || JSON.stringify(err)));
       }
     });
   </script>
