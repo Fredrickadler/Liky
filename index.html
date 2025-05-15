@@ -1,67 +1,62 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello in Farcaster</title>
-    
-    <!-- فریم متا برای پشتیبانی در فارکستر -->
-    <meta name="fc:frame" content='{
-        "version": "next",
-        "imageUrl": "https://example.com/splash.png",
-        "button": {
-            "title": "Say Hello",
-            "action": {
-                "type": "launch_frame",
-                "name": "Hello Frame",
-                "url": "https://example.com",
-                "splashImageUrl": "https://example.com/splash.png",
-                "splashBackgroundColor": "#f0f0f0"
-            }
-        }
-    }'>
-
-    <!-- بارگذاری SDK -->
-    <script src="https://unpkg.com/@farcaster/frame-sdk"></script>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
-        }
-        h1 {
-            color: #333;
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="fc:frame" content='{"version": "next", "imageUrl": "https://example.com/img/start.png", "button": {"title": "Launch Liky", "action": {"type": "launch_frame", "name": "Liky!", "url": "https://liky-omega.vercel.app", "splashImageUrl": "https://example.com/img/splash.png", "splashBackgroundColor": "#eeeee4"}}}' />
+  <title>Liky Mini App</title>
+  <script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk"></script>
 </head>
 <body>
-    <h1>Hello, Farcaster!</h1>
-    <button onclick="sayHello()">Click Me</button>
+  <div id="app">
+    <h1>Welcome to Liky Mini App!</h1>
+    <button id="connectWallet">Connect Wallet</button>
+    <button id="sendNotification">Send Notification</button>
+  </div>
 
-    <script>
-        // فراخوانی تابع ready برای شروع
-        (async function() {
-            try {
-                await sdk.actions.ready();
-                console.log("Frame is ready!");
-            } catch (error) {
-                console.error("Error loading frame:", error);
-            }
-        })();
+  <script>
+    const sdk = window.FarcasterSDK;
 
-        // تابعی برای نمایش پیام
-        function sayHello() {
-            alert("Hello from Farcaster Frame!");
-        }
-    </script>
+    // Function to connect wallet
+    document.getElementById('connectWallet').addEventListener('click', async () => {
+      try {
+        await sdk.wallet.ethProvider.request({ method: 'eth_requestAccounts' });
+        alert('Wallet connected!');
+      } catch (err) {
+        console.error('Error connecting wallet:', err);
+        alert('Failed to connect wallet');
+      }
+    });
+
+    // Function to send notification
+    document.getElementById('sendNotification').addEventListener('click', async () => {
+      try {
+        const notificationDetails = {
+          notificationId: 'notif-1234',
+          title: 'New Update on Liky!',
+          body: 'Check out the new features in Liky!',
+          targetUrl: 'https://liky-omega.vercel.app',
+          tokens: ['token_1', 'token_2'],  // Tokens will be unique for each user, you need to get these from the Farcaster app
+        };
+        
+        // Send notification (you should configure this based on the Farcaster notification system)
+        await fetch('https://example.com/send-notification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(notificationDetails),
+        });
+
+        alert('Notification sent!');
+      } catch (err) {
+        console.error('Error sending notification:', err);
+        alert('Failed to send notification');
+      }
+    });
+
+    // Call sdk.actions.ready to indicate the frame is ready
+    sdk.actions.ready().then(() => {
+      console.log('Frame is ready!');
+    });
+  </script>
 </body>
 </html>
