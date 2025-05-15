@@ -1,0 +1,14 @@
+{
+  "name": "liky-mini-app",
+  "version": "1.0.0",
+  "main": "index.html",
+  "dependencies": {
+    "@farcaster/frame-sdk": "^1.0.0"
+  },
+  "scripts": {
+    "start": "serve ."
+  },
+  "devDependencies": {
+    "serve": "^14.0.1"
+  }
+}
