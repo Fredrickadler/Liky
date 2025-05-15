@@ -3,10 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Liky Mini App</title>
-
-  <!-- Farcaster SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk"></script>
+  <title>FarKaster</title>
 
   <!-- Farcaster Meta -->
   <meta name="fc:frame" content='{
@@ -24,84 +21,610 @@
     }
   }' />
 
-  <style>
-    /* Global Styles */
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Space Grotesk', sans-serif; }
-    body { background-color: #0F0F0F; color: white; min-height: 100vh; overflow-x: hidden; }
+  <!-- Farcaster SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk"></script>
+  
+  <!-- Other Dependencies -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    /* Header */
-    header { display: flex; justify-content: flex-end; padding: 24px 0; }
-    .wallet-btn {
-      background: #8A5AFF; color: white; border: none; padding: 12px 24px;
-      border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 15px;
-      transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;
+  <style>
+    :root {
+      --primary: #8A5AFF;
+      --primary-dark: #6E3AFF;
+      --gray-900: #0F0F0F;
+      --gray-800: #1A1A1A;
+      --gray-700: #2E2E2E;
+      --gray-400: #A0A0A0;
+      --gray-200: #E5E5E5;
+      --gold: #FFD700;
+      --silver: #C0C0C0;
+      --bronze: #CD7F32;
+      --error: #FF4D4D;
+      --success: #4CAF50;
     }
 
-    .wallet-btn:hover { background: #6E3AFF; transform: translateY(-2px); }
-    .wallet-btn i { font-size: 16px; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    body {
+      background-color: var(--gray-900);
+      color: white;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Header Styles */
+    .header {
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    .wallet-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 20px rgba(138, 90, 255, 0.3);
+    }
+
+    .wallet-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(138, 90, 255, 0.4);
+    }
 
     .wallet-address {
-      background: #1A1A1A; padding: 10px 20px; border-radius: 12px;
-      font-size: 14px; font-weight: 500; display: none;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); cursor: pointer;
+      background: var(--gray-800);
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 500;
+      display: none;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     }
 
-    /* Content */
-    .main-content { display: flex; flex-direction: column; align-items: center; padding: 40px 0; }
+    .back-btn {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 5px;
+    }
+
+    .add-order-btn {
+      background: var(--primary);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .add-order-btn:hover {
+      transform: scale(1.1);
+      background: var(--primary-dark);
+    }
+
+    /* Star Animation */
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .star {
+      position: absolute;
+      background: rgba(138, 90, 255, 0.7);
+      border-radius: 50%;
+      animation: twinkle 3s infinite ease-in-out, float 50s linear infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes float {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(100px, -100vh); }
+    }
+
+    /* Page Styles */
+    .page {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .page.active {
+      display: flex;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Post Container */
+    .post-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+      overflow-y: auto;
+    }
+
+    .post-image-container {
+      width: 100%;
+      max-width: 500px;
+      height: 400px;
+      position: relative;
+      margin-bottom: 20px;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .post-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .post-image-container:hover .post-image {
+      transform: scale(1.03);
+    }
+
+    .post-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0) 100%);
+      padding: 20px;
+    }
+
+    .post-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .post-description {
+      color: var(--gray-200);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 20px;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: var(--gray-400);
+    }
+
+    .progress-bar {
+      height: 6px;
+      width: 100%;
+      background: var(--gray-700);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 65%;
+      background: var(--primary);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      width: 100%;
+      max-width: 500px;
+      padding-bottom: 20px;
+    }
+
+    .action-btn {
+      background: var(--gray-800);
+      border: none;
+      padding: 15px;
+      border-radius: 12px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-3px);
+    }
+
+    .action-btn.primary {
+      background: var(--primary);
+      box-shadow: 0 4px 20px rgba(138, 90, 255, 0.3);
+    }
+
+    .action-btn.primary:hover {
+      background: var(--primary-dark);
+    }
+
+    /* Tab Bar */
+    .tab-bar {
+      display: flex;
+      background: var(--gray-800);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 15px;
+      text-align: center;
+      color: var(--gray-400);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+    }
+
+    /* Leaderboard Page */
+    .leaderboard-item {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      background: var(--gray-800);
+      border-radius: 12px;
+      margin-bottom: 10px;
+      max-width: 500px;
+      width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .leaderboard-rank {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+      font-weight: 700;
+      border-radius: 50%;
+    }
+
+    .rank-1 { background: var(--gold); color: #000; border: 2px solid var(--gold); }
+    .rank-2 { background: var(--silver); color: #000; border: 2px solid var(--silver); }
+    .rank-3 { background: var(--bronze); color: #000; border: 2px solid var(--bronze); }
+    .rank-other { background: transparent; color: var(--gray-400); border: 2px solid var(--gray-700); }
+
+    .leaderboard-info { flex: 1; }
+    .leaderboard-name { font-weight: 600; }
+    .leaderboard-score { color: var(--gray-200); font-size: 14px; }
+
+    /* Profile Page */
+    .profile-content {
+      max-width: 500px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .profile-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 20px;
+      border: 3px solid var(--primary);
+    }
+
+    .profile-username {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 30px;
+    }
+
+    .profile-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 30px;
+      width: 100%;
+    }
+
+    .stat-item {
+      background: var(--gray-800);
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--gray-400);
+    }
+
+    .orders-title {
+      align-self: flex-start;
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: var(--gray-200);
+    }
+
+    .order-item {
+      background: var(--gray-800);
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+
+    /* Order Page */
+    .packages-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 15px;
+      padding: 20px;
+      max-width: 500px;
+      margin: 0 auto;
+      width: 100%;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .package-item {
+      background: var(--gray-800);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid var(--primary);
+      transition: all 0.3s;
+    }
+
+    .package-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(138, 90, 255, 0.2);
+    }
+
+    .package-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .package-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .package-price {
+      background: var(--primary);
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    .package-details {
+      color: var(--gray-200);
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+
+    .package-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .package-btn:hover {
+      background: var(--primary-dark);
+    }
+
+    /* Order Form */
+    .order-form-container {
+      max-width: 500px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .order-form-title {
+      font-size: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; margin-bottom: 8px; font-weight: 600; }
+    .form-input {
+      width: 100%;
+      padding: 12px;
+      background: var(--gray-800);
+      border: 1px solid var(--gray-700);
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .submit-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 15px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 20px;
+    }
+
+    .submit-btn:hover { background: var(--primary-dark); }
+    .submit-btn.error { background: var(--error); }
+    .submit-btn.success { background: var(--success); }
+
+    /* Tutorial Overlay */
+    .tutorial-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 15, 15, 0.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .tutorial-content {
+      background: var(--gray-800);
+      border-radius: 16px;
+      padding: 30px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .tutorial-title {
+      font-size: 24px;
+      margin-bottom: 20px;
+      text-align: center;
+      color: var(--primary);
+    }
+
+    .rule-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--gray-700);
+    }
+
+    .rule-checkbox {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--gray-400);
+      border-radius: 4px;
+      margin-right: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+
+    .rule-checkbox.checked {
+      background: var(--success);
+      border-color: var(--success);
+    }
+
+    .rule-checkbox.checked::after {
+      content: "✓";
+      color: white;
+    }
+
+    .tutorial-submit {
+      background: var(--primary);
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 15px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 20px;
+      display: none;
+    }
+
+    .tutorial-submit.active { display: block; }
+    .tutorial-submit:hover { background: var(--primary-dark); }
+
+    @media (max-width: 768px) {
+      .post-image-container { height: 300px; }
+      .profile-avatar { width: 100px; height: 100px; }
+      .profile-username { font-size: 20px; }
+      .wallet-btn, .wallet-address { padding: 10px 20px; font-size: 14px; }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <button class="wallet-btn" id="connectWallet">
-        <i class="fas fa-wallet"></i> Connect Wallet
-      </button>
-      <div class="wallet-address" id="walletAddress"></div>
-    </header>
-
-    <main class="main-content">
-      <div>
-        <h1>Welcome to Liky Mini App!</h1>
-      </div>
-    </main>
-  </div>
-
-  <!-- JavaScript for SDK and Wallet connection -->
-  <script type="module">
-    import sdk from 'https://esm.sh/@farcaster/frame-sdk';
-
-    window.addEventListener('DOMContentLoaded', async () => {
-      try {
-        await sdk.actions.ready();
-        const context = await sdk.context;
-        console.log("Farcaster context:", context);
-      } catch (err) {
-        console.error("Farcaster SDK error:", err);
-      }
-    });
-
-    let provider, signer, address;
-    const connectWallet = document.getElementById('connectWallet');
-    const walletAddress = document.getElementById('walletAddress');
-
-    connectWallet.addEventListener('click', async () => {
-      try {
-        if (window.sdk?.wallet?.ethProvider) {
-          provider = new ethers.BrowserProvider(window.sdk.wallet.ethProvider);
-          await provider.send("eth_requestAccounts", []);
-          signer = await provider.getSigner();
-          address = await signer.getAddress();
-
-          connectWallet.style.display = 'none';
-          walletAddress.style.display = 'block';
-          walletAddress.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
-        } else {
-          alert('Please open this app inside Warpcast to connect your wallet.');
-        }
-      } catch (error) {
-        console.error("Wallet connection failed:", error);
-      }
-    });
-  </script>
-</body>
-</html>
