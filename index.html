@@ -1,12 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="fc:frame" content='{"version": "next", "imageUrl": "https://example.com/img/start.png", "button": {"title": "Launch Liky", "action": {"type": "launch_frame", "name": "Liky!", "url": "https://liky-omega.vercel.app", "splashImageUrl": "https://example.com/img/splash.png", "splashBackgroundColor": "#eeeee4"}}}' />
+  <meta name="fc:frame" content='{
+    "version": "next",
+    "imageUrl": "https://example.com/img/start.png",
+    "button": {
+      "title": "Launch Liky",
+      "action": {
+        "type": "launch_frame",
+        "name": "Liky!",
+        "url": "https://liky-omega.vercel.app",
+        "splashImageUrl": "https://example.com/img/splash.png",
+        "splashBackgroundColor": "#eeeee4"
+      }
+    }
+  }' />
   <title>Liky Mini App</title>
+
+  <!-- Farcaster SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+
+    #app {
+      max-width: 400px;
+      margin: auto;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
 </head>
+
 <body>
   <div id="app">
     <h1>Welcome to Liky Mini App!</h1>
@@ -20,8 +56,11 @@
     // Function to connect wallet
     document.getElementById('connectWallet').addEventListener('click', async () => {
       try {
-        await sdk.wallet.ethProvider.request({ method: 'eth_requestAccounts' });
-        alert('Wallet connected!');
+        // Request to connect wallet
+        const accounts = await sdk.wallet.ethProvider.request({ method: 'eth_requestAccounts' });
+        if (accounts.length > 0) {
+          alert('Wallet connected!');
+        }
       } catch (err) {
         console.error('Error connecting wallet:', err);
         alert('Failed to connect wallet');
@@ -36,9 +75,9 @@
           title: 'New Update on Liky!',
           body: 'Check out the new features in Liky!',
           targetUrl: 'https://liky-omega.vercel.app',
-          tokens: ['token_1', 'token_2'],  // Tokens will be unique for each user, you need to get these from the Farcaster app
+          tokens: ['token_1', 'token_2']  // Tokens will be unique for each user, you need to get these from the Farcaster app
         };
-        
+
         // Send notification (you should configure this based on the Farcaster notification system)
         await fetch('https://example.com/send-notification', {
           method: 'POST',
@@ -53,10 +92,13 @@
       }
     });
 
-    // Call sdk.actions.ready to indicate the frame is ready
+    // Indicate that the frame is ready
     sdk.actions.ready().then(() => {
       console.log('Frame is ready!');
+    }).catch((error) => {
+      console.error('Error while preparing the frame:', error);
     });
   </script>
 </body>
+
 </html>
