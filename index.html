@@ -23,10 +23,10 @@
 
   <!-- Farcaster SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk"></script>
+  <script src="https://unpkg.com/@farcaster/auth-client@latest"></script>
   
   <!-- Other Dependencies -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
@@ -332,7 +332,8 @@
     .tab-bar {
       display: flex;
       background: var(--gray-800);
-      height: 60px;
+      height: 80px;
+      padding: 8px 0;
     }
 
     .tab-btn {
@@ -349,13 +350,14 @@
     }
 
     .tab-btn i {
-      font-size: 20px;
+      font-size: 28px;
       line-height: 1;
+      margin-bottom: 4px;
     }
 
     .tab-btn span {
-      font-size: 12px;
-      font-weight: 500;
+      font-size: 14px;
+      font-weight: 600;
     }
 
     .tab-btn.active {
@@ -880,10 +882,8 @@
     </div>
   </div>
 
-  <script type="module">
-    import sdk from 'https://esm.sh/@farcaster/frame-sdk';
-
-    let provider, signer, address;
+  <script>
+    let authClient;
     let currentPage = 'home-page';
     let previousPage = 'home-page';
     let currentOrder = null;
@@ -891,69 +891,40 @@
     // Initialize App
     document.addEventListener('DOMContentLoaded', async () => {
       try {
-        await sdk.actions.ready();
-        const context = await sdk.context;
-        console.log("Farcaster Ready:", context);
-        
-        initializeApp();
+        authClient = new window.farcasterAuth.AuthClient({
+          relay: 'https://relay.farcaster.xyz',
+          rpcUrl: 'https://mainnet.optimism.io',
+        });
+
         document.body.style.opacity = 1;
         document.getElementById('loading').style.display = 'none';
+        createStars();
       } catch (error) {
         console.error("Initialization Error:", error);
         document.getElementById('loading').style.display = 'none';
-        document.body.innerHTML = `<div class="error">Failed to initialize. Please refresh.</div>`;
+        alert('Failed to initialize. Please refresh.');
       }
     });
 
-    function initializeApp() {
-      createStars();
-      setupWalletConnections();
-    }
-
-    // Star Animation
-    function createStars() {
-      const starsContainer = document.getElementById('stars');
-      for (let i = 0; i < 100; i++) {
-        const star = document.createElement('div');
-        star.classList.add('star');
-        star.style.left = `${Math.random() * 100}%`;
-        star.style.top = `${Math.random() * 100}%`;
-        star.style.width = `${Math.random() * 3 + 1}px`;
-        star.style.height = star.style.width;
-        star.style.animationDelay = `${Math.random() * 3}s`;
-        star.style.animationDuration = `${Math.random() * 30 + 20}s`;
-        starsContainer.appendChild(star);
+    // Wallet Connection
+    async function connectWallet() {
+      try {
+        const { user } = await authClient.authenticate();
+        if(user) {
+          document.querySelectorAll('.wallet-btn').forEach(b => b.style.display = 'none');
+          document.querySelectorAll('.wallet-address').forEach(div => {
+            div.style.display = 'block';
+            div.textContent = `${user.address.slice(0, 6)}...${user.address.slice(-4)}`;
+          });
+        }
+      } catch (error) {
+        console.error("Wallet connection failed:", error);
+        alert('Connection failed. Please try again.');
       }
     }
 
-    // Wallet Connections
-    function setupWalletConnections() {
-      document.querySelectorAll('.wallet-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          try {
-            if (window.sdk?.wallet?.ethProvider) {
-              provider = new ethers.BrowserProvider(window.sdk.wallet.ethProvider);
-              await provider.send("eth_requestAccounts", []);
-              signer = await provider.getSigner();
-              address = await signer.getAddress();
-
-              document.querySelectorAll('.wallet-btn').forEach(b => b.style.display = 'none');
-              document.querySelectorAll('.wallet-address').forEach(div => {
-                div.style.display = 'block';
-                div.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
-              });
-            } else {
-              alert('Please open in Warpcast to connect wallet');
-            }
-          } catch (error) {
-            console.error("Connection failed:", error);
-          }
-        });
-      });
-    }
-
-    // Page Navigation
-    function showPage(pageId) {
+    // Navigation
+    window.showPage = function(pageId) {
       previousPage = currentPage;
       currentPage = pageId;
       
@@ -962,39 +933,48 @@
       
       document.getElementById(pageId).classList.add('active');
       
-      if (['home-page', 'leaderboard-page', 'profile-page'].includes(pageId)) {
+      if(['home-page', 'leaderboard-page', 'profile-page'].includes(pageId)) {
         document.querySelector(`.tab-btn[onclick="showPage('${pageId}')"]`).classList.add('active');
       }
-    }
+    };
 
-    function goBack() {
+    window.goBack = function() {
       showPage(previousPage);
-    }
+    };
 
     // Post Actions
-    function skipPost() { alert('Post skipped! Loading next...'); }
-    function viewPost() { window.open('https://warpcast.com/faruser1/0x0a6d75f4', '_blank'); }
-    function likePost() { confirm('Did you like this post?') ? alert('+1 COIN!') : alert('Please like first!'); }
+    window.skipPost = function() {
+      alert('Post skipped! Loading next...');
+    };
+
+    window.viewPost = function() {
+      window.open('https://warpcast.com/faruser1/0x0a6d75f4', '_blank');
+    };
+
+    window.likePost = function() {
+      confirm('Did you like this post?') ? alert('+1 COIN!') : alert('Please like first!');
+    };
 
     // Order System
-    function startOrder(type, coins, inputType) {
-      if (!address) return alert('Connect wallet first!');
+    window.startOrder = function(type, coins, inputType) {
+      if(!document.getElementById('wallet-address').value) {
+        return alert('Connect wallet first!');
+      }
       
       currentOrder = { type, coins, inputType };
       document.getElementById('order-form-title').textContent = `Order: ${type}`;
       document.getElementById('package-name').value = type;
       document.getElementById('package-price').value = `${coins} COINS`;
-      document.getElementById('wallet-address').value = address;
-      
+      document.getElementById('wallet-address').value = document.querySelector('.wallet-address').textContent;
       document.getElementById('order-link-label').textContent = inputType === 'post' ? 'Post Link' : 'Profile Link';
       showPage('order-form-page');
-    }
+    };
 
-    function submitOrder() {
+    window.submitOrder = function() {
       const link = document.getElementById('order-link').value.trim();
       const submitBtn = document.getElementById('submit-order-btn');
       
-      if (!link) {
+      if(!link) {
         submitBtn.textContent = 'Invalid link!';
         submitBtn.classList.add('error');
         setTimeout(() => {
@@ -1011,7 +991,28 @@
         submitBtn.textContent = 'Confirm Order';
         submitBtn.classList.remove('success');
       }, 2000);
+    };
+
+    // Star Animation
+    function createStars() {
+      const starsContainer = document.getElementById('stars');
+      for(let i = 0; i < 100; i++) {
+        const star = document.createElement('div');
+        star.classList.add('star');
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.width = `${Math.random() * 3 + 1}px`;
+        star.style.height = star.style.width;
+        star.style.animationDelay = `${Math.random() * 3}s`;
+        star.style.animationDuration = `${Math.random() * 30 + 20}s`;
+        starsContainer.appendChild(star);
+      }
     }
+
+    // Event Listeners
+    document.querySelectorAll('.wallet-btn').forEach(btn => {
+      btn.addEventListener('click', connectWallet);
+    });
   </script>
 </body>
 </html>
