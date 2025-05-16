@@ -119,13 +119,20 @@
     }
 
     .wallet-address {
-      background: var(--gray-800);
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       padding: 12px 24px;
       border-radius: 12px;
       font-size: 16px;
-      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
       display: none;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      font-weight: 500;
+    }
+
+    .wallet-address:hover {
+      background: rgba(255, 255, 255, 0.2);
     }
 
     .back-btn {
@@ -171,6 +178,7 @@
       background: rgba(138, 90, 255, 0.7);
       border-radius: 50%;
       animation: twinkle 3s infinite ease-in-out, float 50s linear infinite;
+      opacity: 0;
     }
 
     @keyframes twinkle {
@@ -613,10 +621,10 @@
       <div class="add-order-btn" onclick="showPage('order-page')">
         <i class="fas fa-plus"></i>
       </div>
-      <button class="wallet-btn" onclick="connectWallet()">
+      <button class="wallet-btn" onclick="toggleWallet()">
         <i class="fas fa-wallet"></i> Connect Wallet
       </button>
-      <div class="wallet-address" id="walletAddress"></div>
+      <div class="wallet-address" id="walletAddress" onclick="toggleWallet()"></div>
     </div>
     
     <div class="post-container">
@@ -661,10 +669,10 @@
       <div class="add-order-btn" onclick="showPage('order-page')">
         <i class="fas fa-plus"></i>
       </div>
-      <button class="wallet-btn" onclick="connectWallet()">
+      <button class="wallet-btn" onclick="toggleWallet()">
         <i class="fas fa-wallet"></i> Connect Wallet
       </button>
-      <div class="wallet-address" id="walletAddress2"></div>
+      <div class="wallet-address" id="walletAddress2" onclick="toggleWallet()"></div>
     </div>
     
     <div class="post-container">
@@ -710,10 +718,10 @@
       <div class="add-order-btn" onclick="showPage('order-page')">
         <i class="fas fa-plus"></i>
       </div>
-      <button class="wallet-btn" onclick="connectWallet()">
+      <button class="wallet-btn" onclick="toggleWallet()">
         <i class="fas fa-wallet"></i> Connect Wallet
       </button>
-      <div class="wallet-address" id="walletAddress3"></div>
+      <div class="wallet-address" id="walletAddress3" onclick="toggleWallet()"></div>
     </div>
     
     <div class="profile-content">
@@ -761,10 +769,10 @@
       <button class="back-btn" onclick="goBack()">
         <i class="fas fa-arrow-left"></i>
       </button>
-      <button class="wallet-btn" onclick="connectWallet()">
+      <button class="wallet-btn" onclick="toggleWallet()">
         <i class="fas fa-wallet"></i> Connect Wallet
       </button>
-      <div class="wallet-address" id="walletAddress4"></div>
+      <div class="wallet-address" id="walletAddress4" onclick="toggleWallet()"></div>
     </div>
     
     <div class="packages-container">
@@ -815,10 +823,10 @@
       <button class="back-btn" onclick="showPage('order-page')">
         <i class="fas fa-arrow-left"></i>
       </button>
-      <button class="wallet-btn" onclick="connectWallet()">
+      <button class="wallet-btn" onclick="toggleWallet()">
         <i class="fas fa-wallet"></i> Connect Wallet
       </button>
-      <div class="wallet-address" id="walletAddress5"></div>
+      <div class="wallet-address" id="walletAddress5" onclick="toggleWallet()"></div>
     </div>
     
     <div class="order-form-container">
@@ -873,6 +881,7 @@
     let currentPage = 'home-page';
     let previousPage = 'home-page';
     let currentOrder = null;
+    let isConnected = false;
 
     document.addEventListener('DOMContentLoaded', async () => {
       try {
@@ -896,21 +905,14 @@
       window.likePost = likePost;
       window.startOrder = startOrder;
       window.submitOrder = submitOrder;
-      window.connectWallet = connectWallet;
+      window.toggleWallet = toggleWallet;
     }
 
-    function createStars() {
-      const starsContainer = document.getElementById('stars');
-      for (let i = 0; i < 100; i++) {
-        const star = document.createElement('div');
-        star.classList.add('star');
-        star.style.left = `${Math.random() * 100}%`;
-        star.style.top = `${Math.random() * 100}%`;
-        star.style.width = `${Math.random() * 3 + 1}px`;
-        star.style.height = star.style.width;
-        star.style.animationDelay = `${Math.random() * 3}s`;
-        star.style.animationDuration = `${Math.random() * 30 + 20}s`;
-        starsContainer.appendChild(star);
+    async function toggleWallet() {
+      if (isConnected) {
+        disconnectWallet();
+      } else {
+        await connectWallet();
       }
     }
 
@@ -924,9 +926,10 @@
         provider = sdk.wallet.ethProvider;
         const accounts = await provider.request({ method: 'eth_requestAccounts' });
         address = accounts[0];
+        isConnected = true;
 
         document.querySelectorAll('.wallet-address').forEach(el => {
-          el.textContent = `Connected: ${address.slice(0, 6)}...${address.slice(-4)}`;
+          el.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
           el.style.display = 'block';
         });
 
@@ -936,8 +939,38 @@
 
       } catch (error) {
         console.error("Wallet connection failed:", error);
-        alert('Wallet connection failed');
       }
+    }
+
+    function disconnectWallet() {
+      isConnected = false;
+      address = null;
+      document.querySelectorAll('.wallet-address').forEach(el => {
+        el.style.display = 'none';
+      });
+      document.querySelectorAll('.wallet-btn').forEach(btn => {
+        btn.style.display = 'block';
+      });
+    }
+
+    function createStars() {
+      const starsContainer = document.getElementById('stars');
+      starsContainer.innerHTML = '';
+      
+      setTimeout(() => {
+        for (let i = 0; i < 100; i++) {
+          const star = document.createElement('div');
+          star.classList.add('star');
+          star.style.left = `${Math.random() * 100}%`;
+          star.style.top = `${Math.random() * 100}%`;
+          star.style.width = `${Math.random() * 3 + 1}px`;
+          star.style.height = star.style.width;
+          star.style.animationDelay = `${Math.random() * 3}s`;
+          star.style.animationDuration = `${Math.random() * 30 + 20}s`;
+          star.style.opacity = '0.3';
+          starsContainer.appendChild(star);
+        }
+      }, 500);
     }
 
     function showPage(pageId) {
