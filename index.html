@@ -21,18 +21,16 @@
         }
     }'>
 
-    <!-- SDKs & Dependencies -->
+    <!-- Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* Advanced CSS Variables */
         :root {
             --primary: #8A5AFF;
             --primary-dark: #6E3AFF;
-            --gradient: linear-gradient(135deg, #8A5AFF 0%, #6E3AFF 100%);
             --background: #0F0F0F;
             --surface: #1A1A1A;
             --border: #2E2E2E;
@@ -40,13 +38,11 @@
             --text-secondary: #A0A0A0;
             --success: #4CAF50;
             --error: #FF4D4D;
-            --warning: #FFC107;
             --gold: #FFD700;
             --silver: #C0C0C0;
             --bronze: #CD7F32;
         }
 
-        /* Base Reset */
         * {
             margin: 0;
             padding: 0;
@@ -54,17 +50,11 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        html {
-            scroll-behavior: smooth;
-        }
-
         body {
             background: var(--background);
             color: var(--text-primary);
             font-family: 'Space Grotesk', sans-serif;
-            line-height: 1.6;
-            overflow-x: hidden;
-            position: relative;
+            min-height: 100vh;
         }
 
         /* Loading Overlay */
@@ -74,12 +64,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: var(--background);
+            background: rgba(15, 15, 15, 0.95);
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.3s;
         }
 
         .loading-spinner {
@@ -91,39 +82,26 @@
             animation: spin 1s linear infinite;
         }
 
+        .loading-text {
+            margin-top: 20px;
+            color: var(--text-secondary);
+            animation: pulse 1.5s infinite;
+        }
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        /* Particle Animation */
-        .particles {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
         }
 
-        .particle {
-            position: absolute;
-            background: radial-gradient(circle, var(--primary) 0%, rgba(138,90,255,0) 70%);
-            border-radius: 50%;
-            animation: float 20s linear infinite;
-        }
-
-        @keyframes float {
-            0% { transform: translate(0, 0) scale(0); opacity: 1; }
-            100% { transform: translate(100vw, -100vh) scale(1.5); opacity: 0; }
-        }
-
-        /* Main Layout */
+        /* Main Container */
         .app-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
         }
 
         /* Header */
@@ -143,99 +121,88 @@
         }
 
         .connect-button {
-            background: var(--gradient);
+            background: var(--primary);
             color: white;
             padding: 12px 25px;
-            border-radius: 12px;
             border: none;
+            border-radius: 12px;
             cursor: pointer;
             font-weight: 600;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
         .connect-button:hover {
+            background: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(138,90,255,0.4);
         }
 
         .wallet-address {
             background: var(--surface);
             padding: 10px 20px;
             border-radius: 8px;
-            font-size: 0.9em;
             display: none;
-        }
-
-        /* Main Content */
-        .content-section {
-            flex: 1;
-            display: grid;
-            grid-template-columns: 1fr 300px;
-            gap: 30px;
         }
 
         /* Post Feed */
         .post-feed {
-            background: var(--surface);
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: grid;
+            gap: 25px;
+            margin-bottom: 40px;
         }
 
         .post-card {
-            background: var(--background);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            transition: transform 0.3s ease;
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 25px;
+            transition: transform 0.3s;
         }
 
         .post-card:hover {
-            transform: translateY(-3px);
+            transform: translateY(-5px);
         }
 
         .post-header {
             display: flex;
             align-items: center;
             gap: 15px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .user-avatar {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             border: 2px solid var(--primary);
         }
 
-        .post-content {
-            margin-bottom: 15px;
-        }
-
-        .post-image {
+        .post-content img {
             width: 100%;
             border-radius: 12px;
-            margin-bottom: 15px;
+            margin-top: 15px;
         }
 
         .post-actions {
             display: flex;
-            gap: 10px;
+            gap: 15px;
+            margin-top: 20px;
         }
 
         .action-button {
-            padding: 8px 20px;
+            padding: 10px 20px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .like-button {
-            background: var(--gradient);
+            background: var(--primary);
             color: white;
         }
 
@@ -243,71 +210,68 @@
         .leaderboard-section {
             background: var(--surface);
             border-radius: 16px;
-            padding: 20px;
-            height: fit-content;
+            padding: 25px;
         }
 
         .leaderboard-item {
             display: flex;
             align-items: center;
             padding: 15px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             background: var(--background);
             border-radius: 12px;
         }
 
-        /* Profile */
+        .rank-badge {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: 700;
+        }
+
+        /* Profile Section */
         .profile-section {
-            text-align: center;
-            padding: 30px;
             background: var(--surface);
             border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            margin-top: 30px;
         }
 
         .profile-avatar {
             width: 120px;
             height: 120px;
             border-radius: 50%;
-            margin: 0 auto 20px;
             border: 3px solid var(--primary);
+            margin-bottom: 20px;
         }
 
-        /* Advanced Responsive Design */
+        /* Responsive Design */
         @media (max-width: 768px) {
-            .content-section {
-                grid-template-columns: 1fr;
-            }
-            
             .app-header {
                 flex-direction: column;
                 gap: 20px;
+                text-align: center;
             }
-        }
-
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.6s ease-out;
+            
+            .post-actions {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Loading Screen -->
     <div class="loading-overlay" id="loading">
         <div class="loading-spinner"></div>
+        <p class="loading-text">Initializing Application</p>
     </div>
 
-    <!-- Particle Effects -->
-    <div class="particles" id="particles"></div>
-
-    <!-- Main App Container -->
     <div class="app-container">
-        <!-- Header -->
-        <header class="app-header fade-in">
+        <header class="app-header">
             <h1>Liky Pro</h1>
             <div class="wallet-section">
                 <button class="connect-button" id="connectButton">
@@ -318,95 +282,125 @@
             </div>
         </header>
 
-        <!-- Main Content -->
-        <main class="content-section">
-            <!-- Post Feed -->
-            <section class="post-feed fade-in" id="postFeed"></section>
-
-            <!-- Sidebar -->
-            <aside class="sidebar">
-                <!-- Leaderboard -->
-                <section class="leaderboard-section fade-in" id="leaderboard"></section>
-                
-                <!-- Profile -->
-                <section class="profile-section fade-in" id="profile"></section>
-            </aside>
+        <main>
+            <section class="post-feed" id="postFeed"></section>
+            <section class="leaderboard-section" id="leaderboard"></section>
+            <section class="profile-section" id="profile"></section>
         </main>
     </div>
 
     <script type="module">
         import sdk from 'https://esm.sh/@farcaster/frame-sdk';
 
-        // Advanced State Management
-        class AppState {
+        class LikyApp {
             constructor() {
-                this.currentUser = null;
-                this.posts = [];
-                this.leaderboard = [];
-                this.isLoading = true;
+                this.state = {
+                    currentUser: null,
+                    posts: [],
+                    leaderboard: [],
+                    currentPostIndex: 0
+                };
+                
+                this.init();
             }
 
             async init() {
-                await this.loadPosts();
-                await this.loadLeaderboard();
-                this.initWallet();
-                this.initUI();
+                try {
+                    await this.initializeSDK();
+                    await this.loadData();
+                    this.setupEventListeners();
+                    this.updateUI();
+                    this.hideLoading();
+                } catch (error) {
+                    this.handleError(error);
+                }
             }
 
-            async loadPosts() {
-                // Simulated API Call
-                this.posts = await this.mockAPICall('/posts', [
+            async initializeSDK() {
+                await sdk.actions.ready();
+                if (window.sdk?.wallet?.ethProvider) {
+                    this.provider = new ethers.BrowserProvider(window.sdk.wallet.ethProvider);
+                    this.signer = await this.provider.getSigner();
+                    this.state.currentUser = {
+                        address: await this.signer.getAddress(),
+                        balance: 100,
+                        likes: 0,
+                        following: []
+                    };
+                }
+            }
+
+            async loadData() {
+                this.state.posts = await this.fetchPosts();
+                this.state.leaderboard = await this.fetchLeaderboard();
+            }
+
+            async fetchPosts() {
+                return [
                     {
                         id: 1,
                         user: '@fredrickadler',
                         content: 'Building the future of decentralized social media! 🚀',
                         image: 'https://i.imgur.com/muoYEIu.jpeg',
                         likes: 142,
-                        rewards: 1,
-                        type: 'like',
-                        url: 'https://warpcast.com/fredrickadler/0x3606f806'
+                        url: 'https://warpcast.com/fredrickadler/0x3606f806',
+                        type: 'like'
                     },
-                    // More posts...
-                ]);
-            }
-
-            async loadLeaderboard() {
-                this.leaderboard = await this.mockAPICall('/leaderboard', [
-                    { rank: 1, user: '@user1', score: 1245 },
-                    { rank: 2, user: '@user2', score: 1120 },
-                    // More leaderboard entries...
-                ]);
-            }
-
-            async mockAPICall(url, data) {
-                return new Promise(resolve => 
-                    setTimeout(() => resolve(data), 500)
-                );
-            }
-
-            // Wallet Management
-            async initWallet() {
-                try {
-                    await sdk.actions.ready();
-                    if (window.sdk?.wallet?.ethProvider) {
-                        this.provider = new ethers.BrowserProvider(window.sdk.wallet.ethProvider);
-                        this.signer = await this.provider.getSigner();
-                        this.currentUser = {
-                            address: await this.signer.getAddress(),
-                            balance: 100,
-                            // ...其他用户属性
-                        };
-                        this.updateUI();
+                    {
+                        id: 2,
+                        user: '@web3builder',
+                        content: 'Join our community and earn rewards! 🎉',
+                        image: 'https://i.imgur.com/abc123.jpg',
+                        likes: 89,
+                        url: 'https://warpcast.com/web3builder/0x8c05d3a7',
+                        type: 'follow'
                     }
+                ];
+            }
+
+            async fetchLeaderboard() {
+                return [
+                    { rank: 1, username: '@topuser1', score: 1245 },
+                    { rank: 2, username: '@topuser2', score: 1120 },
+                    { rank: 3, username: '@topuser3', score: 980 }
+                ];
+            }
+
+            setupEventListeners() {
+                document.getElementById('connectButton').addEventListener('click', () => this.connectWallet());
+                window.handleLike = (postId) => this.handleLike(postId);
+                window.viewPost = (url) => this.viewPost(url);
+                window.skipPost = () => this.skipPost();
+            }
+
+            async connectWallet() {
+                try {
+                    await this.initializeSDK();
+                    this.updateUI();
                 } catch (error) {
-                    console.error('Wallet initialization failed:', error);
-                } finally {
-                    this.isLoading = false;
-                    this.toggleLoading(false);
+                    alert('Wallet connection failed: ' + error.message);
                 }
             }
 
-            // UI Updates
+            handleLike(postId) {
+                const post = this.state.posts.find(p => p.id === postId);
+                if (post) {
+                    post.likes++;
+                    this.state.currentUser.balance++;
+                    this.updateUI();
+                }
+            }
+
+            viewPost(url) {
+                window.open(url, '_blank');
+            }
+
+            skipPost() {
+                this.state.currentPostIndex = 
+                    (this.state.currentPostIndex + 1) % this.state.posts.length;
+                this.updateUI();
+            }
+
             updateUI() {
                 this.renderPosts();
                 this.renderLeaderboard();
@@ -415,77 +409,119 @@
             }
 
             renderPosts() {
-                const feed = document.getElementById('postFeed');
-                feed.innerHTML = this.posts.map(post => `
+                const postFeed = document.getElementById('postFeed');
+                postFeed.innerHTML = this.state.posts.map(post => `
                     <article class="post-card">
-                        <header class="post-header">
+                        <div class="post-header">
                             <img src="${post.image}" class="user-avatar" alt="${post.user}">
                             <h3>${post.user}</h3>
-                        </header>
+                        </div>
                         <div class="post-content">
                             <p>${post.content}</p>
                             ${post.image ? `<img src="${post.image}" class="post-image" alt="Post">` : ''}
                         </div>
                         <div class="post-actions">
                             <button class="action-button like-button" 
-                                    data-post-id="${post.id}"
-                                    onclick="handleLike('${post.id}')">
+                                    onclick="handleLike(${post.id})">
                                 <i class="fas fa-heart"></i>
                                 Like (${post.likes})
                             </button>
-                            <button class="action-button" 
-                                    onclick="viewPost('${post.url}')">
+                            <button class="action-button" onclick="viewPost('${post.url}')">
                                 <i class="fas fa-external-link-alt"></i>
-                                View
+                                View Post
+                            </button>
+                            <button class="action-button" onclick="skipPost()">
+                                <i class="fas fa-forward"></i>
+                                Skip
                             </button>
                         </div>
                     </article>
                 `).join('');
             }
 
-            // ...其他方法（renderLeaderboard, renderProfile, etc）
+            renderLeaderboard() {
+                const leaderboard = document.getElementById('leaderboard');
+                leaderboard.innerHTML = `
+                    <h2>🏆 Leaderboard</h2>
+                    ${this.state.leaderboard.map(user => `
+                        <div class="leaderboard-item">
+                            <div class="rank-badge" style="background: ${this.getRankColor(user.rank)}">
+                                ${user.rank}
+                            </div>
+                            <div>
+                                <h3>${user.username}</h3>
+                                <p>🪙 ${user.score} COINS</p>
+                            </div>
+                        </div>
+                    `).join('')}
+                `;
+            }
+
+            renderProfile() {
+                const profile = document.getElementById('profile');
+                if (!this.state.currentUser) return;
+
+                profile.innerHTML = `
+                    <img src="https://i.imgur.com/ABCD5678.jpg" class="profile-avatar" alt="Profile">
+                    <h2>${this.state.currentUser.address.slice(0, 6)}...${this.state.currentUser.address.slice(-4)}</h2>
+                    <div class="profile-stats">
+                        <div>
+                            <h3>${this.state.currentUser.balance}</h3>
+                            <p>COINS</p>
+                        </div>
+                        <div>
+                            <h3>${this.state.currentUser.likes}</h3>
+                            <p>LIKES</p>
+                        </div>
+                        <div>
+                            <h3>${this.state.currentUser.following.length}</h3>
+                            <p>FOLLOWING</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            updateWalletDisplay() {
+                const walletAddress = document.getElementById('walletAddress');
+                if (this.state.currentUser) {
+                    document.getElementById('connectButton').style.display = 'none';
+                    walletAddress.style.display = 'block';
+                    walletAddress.textContent = `${this.state.currentUser.address.slice(0, 6)}...${this.state.currentUser.address.slice(-4)}`;
+                }
+            }
+
+            getRankColor(rank) {
+                return {
+                    1: 'var(--gold)',
+                    2: 'var(--silver)',
+                    3: 'var(--bronze)'
+                }[rank] || 'var(--surface)';
+            }
+
+            hideLoading() {
+                document.getElementById('loading').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loading').style.display = 'none';
+                }, 300);
+            }
+
+            handleError(error) {
+                console.error('Application Error:', error);
+                document.getElementById('loading').innerHTML = `
+                    <div style="text-align: center; padding: 20px;">
+                        <h2 style="color: var(--error)">⚠️ Application Error</h2>
+                        <p>${error.message}</p>
+                        <button onclick="location.reload()" 
+                                style="margin-top: 15px; padding: 10px 20px; background: var(--primary); border: none; border-radius: 8px; cursor: pointer;">
+                            Reload Application
+                        </button>
+                    </div>
+                `;
+            }
         }
 
         // Initialize Application
-        const app = new AppState();
-        
-        // Event Handlers
-        window.handleLike = (postId) => {
-            const post = app.posts.find(p => p.id == postId);
-            if (post) {
-                post.likes++;
-                app.renderPosts();
-            }
-        };
-
-        window.viewPost = (url) => {
-            window.open(url, '_blank');
-        };
-
-        document.getElementById('connectButton').addEventListener('click', async () => {
-            await app.initWallet();
-        });
-
-        // Initialization
-        window.addEventListener('DOMContentLoaded', async () => {
-            await app.init();
-            createParticles();
-        });
-
-        // Particle Animation
-        function createParticles() {
-            const container = document.getElementById('particles');
-            for(let i = 0; i < 50; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = `${Math.random() * 100}%`;
-                particle.style.top = `${Math.random() * 100}%`;
-                particle.style.width = particle.style.height = `${Math.random() * 20 + 10}px`;
-                particle.style.animationDuration = `${Math.random() * 10 + 10}s`;
-                particle.style.animationDelay = `${Math.random() * 5}s`;
-                container.appendChild(particle);
-            }
-        }
+        new LikyApp();
     </script>
 </body>
 </html>
