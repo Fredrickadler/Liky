@@ -630,4 +630,389 @@
       <button class="wallet-btn" id="connectWallet">
         <i class="fas fa-wallet"></i> Connect Wallet
       </button>
-      <div class="wallet-address" id="walletAddress
+      <div class="wallet-address" id="walletAddress"></div>
+    </div>
+    
+    <div class="post-container">
+      <div class="post-image-container">
+        <img src="https://i.imgur.com/muoYEIu.jpeg" class="post-image" alt="Post">
+        <div class="post-overlay">
+          <h3 class="post-title">@faruser1</h3>
+          <p class="post-description">Like this post to earn 1 COIN. Verify after liking.</p>
+        </div>
+      </div>
+      
+      <div class="progress-container">
+        <div class="progress-info">
+          <span>65% completed</span>
+          <span>142/220 likes</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill"></div>
+        </div>
+      </div>
+      
+      <div class="action-buttons">
+        <button class="action-btn" onclick="skipPost()">
+          <i class="fas fa-forward"></i>
+          <span>SKIP</span>
+        </button>
+        <button class="action-btn" onclick="viewPost()">
+          <i class="fas fa-external-link-alt"></i>
+          <span>VIEW</span>
+        </button>
+        <button class="action-btn primary" onclick="likePost()">
+          <i class="fas fa-heart"></i>
+          <span>LIKE</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaderboard Page -->
+  <div class="page" id="leaderboard-page">
+    <div class="header">
+      <div class="add-order-btn" onclick="showPage('order-page')">
+        <i class="fas fa-plus"></i>
+      </div>
+      <button class="wallet-btn" id="connectWallet2">
+        <i class="fas fa-wallet"></i> Connect Wallet
+      </button>
+      <div class="wallet-address" id="walletAddress2"></div>
+    </div>
+    
+    <div class="post-container">
+      <div style="padding: 20px; width: 100%; max-width: 500px;">
+        <div class="leaderboard-item">
+          <div class="leaderboard-rank rank-1">1</div>
+          <div class="leaderboard-info">
+            <div class="leaderboard-name">@topuser1</div>
+            <div class="leaderboard-score">1,245 COINS</div>
+          </div>
+        </div>
+        
+        <div class="leaderboard-item">
+          <div class="leaderboard-rank rank-2">2</div>
+          <div class="leaderboard-info">
+            <div class="leaderboard-name">@topuser2</div>
+            <div class="leaderboard-score">1,120 COINS</div>
+          </div>
+        </div>
+        
+        <div class="leaderboard-item">
+          <div class="leaderboard-rank rank-3">3</div>
+          <div class="leaderboard-info">
+            <div class="leaderboard-name">@topuser3</div>
+            <div class="leaderboard-score">980 COINS</div>
+          </div>
+        </div>
+
+        <div class="leaderboard-item">
+          <div class="leaderboard-rank rank-other">4</div>
+          <div class="leaderboard-info">
+            <div class="leaderboard-name">@user4</div>
+            <div class="leaderboard-score">850 COINS</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Page -->
+  <div class="page" id="profile-page">
+    <div class="header">
+      <div class="add-order-btn" onclick="showPage('order-page')">
+        <i class="fas fa-plus"></i>
+      </div>
+      <button class="wallet-btn" id="connectWallet3">
+        <i class="fas fa-wallet"></i> Connect Wallet
+      </button>
+      <div class="wallet-address" id="walletAddress3"></div>
+    </div>
+    
+    <div class="profile-content">
+      <img src="https://i.imgur.com/ABCD5678.jpg" class="profile-avatar" alt="Profile">
+      <div class="profile-username">@yourusername</div>
+      
+      <div class="profile-stats">
+        <div class="stat-item">
+          <div class="stat-value">142</div>
+          <div class="stat-label">LIKES</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">89</div>
+          <div class="stat-label">COINS</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">23</div>
+          <div class="stat-label">POSTS</div>
+        </div>
+      </div>
+      
+      <div class="orders-title">Your Orders</div>
+      
+      <div class="order-item">
+        <div class="order-type">30 Likes Package</div>
+        <div class="order-details">
+          <span>Status: Completed</span>
+          <span>50 COINS</span>
+        </div>
+      </div>
+      
+      <div class="order-item">
+        <div class="order-type">20 Followers Package</div>
+        <div class="order-details">
+          <span>Status: In Progress</span>
+          <span>70 COINS</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Page -->
+  <div class="page" id="order-page">
+    <div class="header">
+      <button class="back-btn" onclick="goBack()">
+        <i class="fas fa-arrow-left"></i>
+      </button>
+      <button class="wallet-btn" id="connectWallet4">
+        <i class="fas fa-wallet"></i> Connect Wallet
+      </button>
+      <div class="wallet-address" id="walletAddress4"></div>
+    </div>
+    
+    <div class="packages-container">
+      <div class="package-item">
+        <div class="package-header">
+          <div class="package-title">30 Likes</div>
+          <div class="package-price">50 COINS</div>
+        </div>
+        <div class="package-details">
+          Get 30 real likes on your post. This will help boost your engagement and visibility.
+        </div>
+        <button class="package-btn" onclick="startOrder('30 Likes', 50, 'post')">
+          Order Now
+        </button>
+      </div>
+      
+      <div class="package-item">
+        <div class="package-header">
+          <div class="package-title">30 Followers</div>
+          <div class="package-price">70 COINS</div>
+        </div>
+        <div class="package-details">
+          Gain 30 real followers to your profile. Increase your audience and reach.
+        </div>
+        <button class="package-btn" onclick="startOrder('30 Followers', 70, 'profile')">
+          Order Now
+        </button>
+      </div>
+      
+      <div class="package-item">
+        <div class="package-header">
+          <div class="package-title">30 Comments</div>
+          <div class="package-price">50 COINS</div>
+        </div>
+        <div class="package-details">
+          Receive 30 genuine comments on your post. Improve engagement and interaction.
+        </div>
+        <button class="package-btn" onclick="startOrder('30 Comments', 50, 'post')">
+          Order Now
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Form Page -->
+  <div class="page" id="order-form-page">
+    <div class="header">
+      <button class="back-btn" onclick="showPage('order-page')">
+        <i class="fas fa-arrow-left"></i>
+      </button>
+      <button class="wallet-btn" id="connectWallet5">
+        <i class="fas fa-wallet"></i> Connect Wallet
+      </button>
+      <div class="wallet-address" id="walletAddress5"></div>
+    </div>
+    
+    <div class="order-form-container">
+      <h2 class="order-form-title" id="order-form-title">Complete Your Order</h2>
+      
+      <div class="form-group">
+        <label class="form-label" id="order-link-label">Post Link</label>
+        <input type="text" class="form-input" id="order-link" placeholder="https://warpcast.com/yourusername/0x123456">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Your Wallet Address</label>
+        <input type="text" class="form-input" id="wallet-address" readonly>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Package</label>
+        <input type="text" class="form-input" id="package-name" readonly>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Price</label>
+        <input type="text" class="form-input" id="package-price" readonly>
+      </div>
+      
+      <button class="submit-btn" id="submit-order-btn" onclick="submitOrder()">
+        Confirm Order
+      </button>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab-btn active" onclick="showPage('home-page')">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </div>
+    <div class="tab-btn" onclick="showPage('leaderboard-page')">
+      <i class="fas fa-trophy"></i>
+      <span>Leaderboard</span>
+    </div>
+    <div class="tab-btn" onclick="showPage('profile-page')">
+      <i class="fas fa-user"></i>
+      <span>Profile</span>
+    </div>
+  </div>
+
+  <script type="module">
+    import sdk from 'https://esm.sh/@farcaster/frame-sdk';
+
+    let provider, signer, address;
+    let currentPage = 'home-page';
+    let previousPage = 'home-page';
+    let currentOrder = null;
+
+    // Initialize App
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        await sdk.actions.ready();
+        const context = await sdk.context;
+        console.log("Farcaster Ready:", context);
+        
+        initializeApp();
+        document.body.style.opacity = 1;
+        document.getElementById('loading').style.display = 'none';
+        
+      } catch (error) {
+        console.error("Initialization Error:", error);
+        document.getElementById('loading').style.display = 'none';
+        document.body.innerHTML = `<div class="error">Failed to initialize. Please refresh.</div>`;
+      }
+    });
+
+    function initializeApp() {
+      createStars();
+      setupWalletConnections();
+    }
+
+    // Star Animation
+    function createStars() {
+      const starsContainer = document.getElementById('stars');
+      for (let i = 0; i < 100; i++) {
+        const star = document.createElement('div');
+        star.classList.add('star');
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.width = `${Math.random() * 3 + 1}px`;
+        star.style.height = star.style.width;
+        star.style.animationDelay = `${Math.random() * 3}s`;
+        star.style.animationDuration = `${Math.random() * 30 + 20}s`;
+        starsContainer.appendChild(star);
+      }
+    }
+
+    // Wallet Connections
+    function setupWalletConnections() {
+      document.querySelectorAll('.wallet-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          try {
+            if (window.sdk?.wallet?.ethProvider) {
+              provider = new ethers.BrowserProvider(window.sdk.wallet.ethProvider);
+              await provider.send("eth_requestAccounts", []);
+              signer = await provider.getSigner();
+              address = await signer.getAddress();
+
+              document.querySelectorAll('.wallet-btn').forEach(b => b.style.display = 'none');
+              document.querySelectorAll('.wallet-address').forEach(div => {
+                div.style.display = 'block';
+                div.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
+              });
+            } else {
+              alert('Please open in Warpcast to connect wallet');
+            }
+          } catch (error) {
+            console.error("Connection failed:", error);
+          }
+        });
+      });
+    }
+
+    // Page Navigation
+    function showPage(pageId) {
+      previousPage = currentPage;
+      currentPage = pageId;
+      
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      
+      document.getElementById(pageId).classList.add('active');
+      
+      if (['home-page', 'leaderboard-page', 'profile-page'].includes(pageId)) {
+        document.querySelector(`.tab-btn[onclick="showPage('${pageId}')"]`).classList.add('active');
+      }
+    }
+
+    function goBack() {
+      showPage(previousPage);
+    }
+
+    // Post Actions
+    function skipPost() { alert('Post skipped! Loading next...'); }
+    function viewPost() { window.open('https://warpcast.com/faruser1/0x0a6d75f4', '_blank'); }
+    function likePost() { confirm('Did you like this post?') ? alert('+1 COIN!') : alert('Please like first!'); }
+
+    // Order System
+    function startOrder(type, coins, inputType) {
+      if (!address) return alert('Connect wallet first!');
+      
+      currentOrder = { type, coins, inputType };
+      document.getElementById('order-form-title').textContent = `Order: ${type}`;
+      document.getElementById('package-name').value = type;
+      document.getElementById('package-price').value = `${coins} COINS`;
+      document.getElementById('wallet-address').value = address;
+      
+      document.getElementById('order-link-label').textContent = inputType === 'post' ? 'Post Link' : 'Profile Link';
+      showPage('order-form-page');
+    }
+
+    function submitOrder() {
+      const link = document.getElementById('order-link').value.trim();
+      const submitBtn = document.getElementById('submit-order-btn');
+      
+      if (!link) {
+        submitBtn.textContent = 'Invalid link!';
+        submitBtn.classList.add('error');
+        setTimeout(() => {
+          submitBtn.textContent = 'Confirm Order';
+          submitBtn.classList.remove('error');
+        }, 2000);
+        return;
+      }
+      
+      submitBtn.textContent = 'Order Submitted!';
+      submitBtn.classList.add('success');
+      setTimeout(() => {
+        showPage('profile-page');
+        submitBtn.textContent = 'Confirm Order';
+        submitBtn.classList.remove('success');
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
