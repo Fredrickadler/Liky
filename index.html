@@ -888,7 +888,6 @@
     let previousPage = 'home-page';
     let currentOrder = null;
 
-    // Initialize App
     document.addEventListener('DOMContentLoaded', async () => {
       try {
         await sdk.actions.ready();
@@ -908,9 +907,17 @@
     function initializeApp() {
       createStars();
       setupWalletConnections();
+      
+      // Expose functions to global scope
+      window.showPage = showPage;
+      window.goBack = goBack;
+      window.skipPost = skipPost;
+      window.viewPost = viewPost;
+      window.likePost = likePost;
+      window.startOrder = startOrder;
+      window.submitOrder = submitOrder;
     }
 
-    // Star Animation
     function createStars() {
       const starsContainer = document.getElementById('stars');
       for (let i = 0; i < 100; i++) {
@@ -926,25 +933,28 @@
       }
     }
 
-    // Wallet Connections
     function setupWalletConnections() {
-      document.querySelectorAll('.wallet-btn').forEach(btn => {
+      const walletButtons = document.querySelectorAll('.wallet-btn');
+      const walletAddresses = document.querySelectorAll('.wallet-address');
+
+      walletButtons.forEach(btn => {
         btn.addEventListener('click', async () => {
           try {
-            if (window.sdk?.wallet?.ethProvider) {
-              provider = new ethers.BrowserProvider(window.sdk.wallet.ethProvider);
-              await provider.send("eth_requestAccounts", []);
-              signer = await provider.getSigner();
-              address = await signer.getAddress();
-
-              document.querySelectorAll('.wallet-btn').forEach(b => b.style.display = 'none');
-              document.querySelectorAll('.wallet-address').forEach(div => {
-                div.style.display = 'block';
-                div.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
-              });
-            } else {
+            if (!window.sdk?.wallet?.ethProvider) {
               alert('Please open in Warpcast to connect wallet');
+              return;
             }
+
+            provider = new ethers.BrowserProvider(window.sdk.wallet.ethProvider);
+            await provider.send("eth_requestAccounts", []);
+            signer = await provider.getSigner();
+            address = await signer.getAddress();
+
+            walletButtons.forEach(b => b.style.display = 'none');
+            walletAddresses.forEach(div => {
+              div.style.display = 'block';
+              div.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
+            });
           } catch (error) {
             console.error("Connection failed:", error);
           }
@@ -952,7 +962,6 @@
       });
     }
 
-    // Page Navigation
     function showPage(pageId) {
       previousPage = currentPage;
       currentPage = pageId;
@@ -971,12 +980,10 @@
       showPage(previousPage);
     }
 
-    // Post Actions
     function skipPost() { alert('Post skipped! Loading next...'); }
     function viewPost() { window.open('https://warpcast.com/faruser1/0x0a6d75f4', '_blank'); }
     function likePost() { confirm('Did you like this post?') ? alert('+1 COIN!') : alert('Please like first!'); }
 
-    // Order System
     function startOrder(type, coins, inputType) {
       if (!address) return alert('Connect wallet first!');
       
