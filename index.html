@@ -8,7 +8,7 @@
   <!-- Farcaster Meta -->
   <meta name="fc:frame" content='{
     "version":"next",
-    "imageUrl":"https://i.imgur.com/dDpcwCa_d.webp?maxwidth=1520&fidelity=grand",
+    "imageUrl":"https://i.imgur.com/UxZ1DqS_d.webp?maxwidth=1520&fidelity=grand",
     "button":{
       "title":"Liky Mini App",
       "action":{
@@ -59,11 +59,9 @@
       flex-direction: column;
       overflow: hidden;
       position: relative;
-      opacity: 0;
-      transition: opacity 0.3s;
+      opacity: 1;
     }
 
-    /* Loading Overlay */
     .loading-overlay {
       position: fixed;
       top: 0;
@@ -90,7 +88,6 @@
       to { transform: rotate(360deg); }
     }
 
-    /* Header Styles */
     .header {
       padding: 15px;
       display: flex;
@@ -159,7 +156,6 @@
       background: var(--primary-dark);
     }
 
-    /* Star Animation */
     .stars {
       position: fixed;
       top: 0;
@@ -187,7 +183,6 @@
       100% { transform: translate(100px, -100vh); }
     }
 
-    /* Page Styles */
     .page {
       flex: 1;
       display: none;
@@ -205,7 +200,6 @@
       to { opacity: 1; }
     }
 
-    /* Post Container */
     .post-container {
       flex: 1;
       display: flex;
@@ -258,7 +252,6 @@
       line-height: 1.5;
     }
 
-    /* Progress Bar */
     .progress-container {
       width: 100%;
       max-width: 500px;
@@ -289,7 +282,6 @@
       transition: width 0.5s ease;
     }
 
-    /* Action Buttons */
     .action-buttons {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -327,7 +319,6 @@
       background: var(--primary-dark);
     }
 
-    /* Tab Bar */
     .tab-bar {
       display: flex;
       background: var(--gray-800);
@@ -362,7 +353,6 @@
       background: rgba(138, 90, 255, 0.1);
     }
 
-    /* Leaderboard Page */
     .leaderboard-item {
       display: flex;
       align-items: center;
@@ -417,7 +407,6 @@
       font-size: 14px;
     }
 
-    /* Profile Page */
     .profile-content {
       max-width: 500px;
       width: 100%;
@@ -486,7 +475,6 @@
       width: 100%;
     }
 
-    /* Order Page */
     .packages-container {
       display: grid;
       grid-template-columns: 1fr;
@@ -553,7 +541,6 @@
       background: var(--primary-dark);
     }
 
-    /* Order Form */
     .order-form-container {
       max-width: 500px;
       width: 100%;
@@ -887,16 +874,12 @@
     let previousPage = 'home-page';
     let currentOrder = null;
 
-    // Initialize App
     document.addEventListener('DOMContentLoaded', async () => {
       try {
         await sdk.actions.ready();
-        const context = await sdk.context;
-        console.log("Farcaster Ready:", context);
-        
-        initializeApp();
         document.body.style.opacity = 1;
         document.getElementById('loading').style.display = 'none';
+        initializeApp();
       } catch (error) {
         console.error("Initialization Error:", error);
         document.getElementById('loading').style.display = 'none';
@@ -906,7 +889,6 @@
 
     function initializeApp() {
       createStars();
-      setupWalletConnections();
       window.showPage = showPage;
       window.goBack = goBack;
       window.skipPost = skipPost;
@@ -917,7 +899,6 @@
       window.connectWallet = connectWallet;
     }
 
-    // Star Animation
     function createStars() {
       const starsContainer = document.getElementById('stars');
       for (let i = 0; i < 100; i++) {
@@ -933,7 +914,6 @@
       }
     }
 
-    // Wallet Connection Logic
     async function connectWallet() {
       try {
         if (!sdk.wallet?.ethProvider) {
@@ -945,13 +925,11 @@
         const accounts = await provider.request({ method: 'eth_requestAccounts' });
         address = accounts[0];
 
-        // Update all wallet address displays
         document.querySelectorAll('.wallet-address').forEach(el => {
           el.textContent = `Connected: ${address.slice(0, 6)}...${address.slice(-4)}`;
           el.style.display = 'block';
         });
 
-        // Hide all wallet buttons
         document.querySelectorAll('.wallet-btn').forEach(btn => {
           btn.style.display = 'none';
         });
@@ -962,7 +940,6 @@
       }
     }
 
-    // Page Navigation
     function showPage(pageId) {
       previousPage = currentPage;
       currentPage = pageId;
@@ -981,12 +958,10 @@
       showPage(previousPage);
     }
 
-    // Post Actions
     function skipPost() { alert('Post skipped! Loading next...'); }
     function viewPost() { window.open('https://warpcast.com/faruser1/0x0a6d75f4', '_blank'); }
     function likePost() { confirm('Did you like this post?') ? alert('+1 COIN!') : alert('Please like first!'); }
 
-    // Order System
     function startOrder(type, coins, inputType) {
       if (!address) return alert('Connect wallet first!');
       
