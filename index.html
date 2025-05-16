@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>FarKaster</title>
 
   <!-- Farcaster Meta -->
@@ -22,11 +22,12 @@
   }' />
 
   <!-- Farcaster SDK -->
-  <script src="https://unpkg.com/@farcaster/auth-client@1.2.0/dist/auth-client.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk"></script>
   
   <!-- Other Dependencies -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -87,9 +88,7 @@
     }
 
     @keyframes spin {
-      to { 
-        transform: rotate(360deg); 
-      }
+      to { transform: rotate(360deg); }
     }
 
     /* Header Styles */
@@ -180,21 +179,13 @@
     }
 
     @keyframes twinkle {
-      0%, 100% { 
-        opacity: 0.3; 
-      }
-      50% { 
-        opacity: 1; 
-      }
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
     }
 
     @keyframes float {
-      0% { 
-        transform: translate(0, 0); 
-      }
-      100% { 
-        transform: translate(100px, -100vh); 
-      }
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(100px, -100vh); }
     }
 
     /* Page Styles */
@@ -211,12 +202,8 @@
     }
 
     @keyframes fadeIn {
-      from { 
-        opacity: 0; 
-      }
-      to { 
-        opacity: 1; 
-      }
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     /* Post Container */
@@ -345,8 +332,7 @@
     .tab-bar {
       display: flex;
       background: var(--gray-800);
-      height: 85px;
-      padding: 12px 0;
+      height: 60px;
     }
 
     .tab-btn {
@@ -363,14 +349,13 @@
     }
 
     .tab-btn i {
-      font-size: 30px;
+      font-size: 20px;
       line-height: 1;
-      margin-bottom: 6px;
     }
 
     .tab-btn span {
-      font-size: 15px;
-      font-weight: 700;
+      font-size: 12px;
+      font-weight: 500;
     }
 
     .tab-btn.active {
@@ -403,21 +388,10 @@
       flex-shrink: 0;
     }
 
-    .rank-1 { 
-      background: var(--gold); 
-      color: #000; 
-    }
-    .rank-2 { 
-      background: var(--silver); 
-      color: #000; 
-    }
-    .rank-3 { 
-      background: var(--bronze); 
-      color: #000; 
-    }
-    .rank-other { 
-      background: var(--gray-700); 
-    }
+    .rank-1 { background: var(--gold); color: #000; }
+    .rank-2 { background: var(--silver); color: #000; }
+    .rank-3 { background: var(--bronze); color: #000; }
+    .rank-other { background: var(--gray-700); }
 
     .leaderboard-info {
       flex: 1;
@@ -596,14 +570,8 @@
       text-align: center;
     }
 
-    .form-group { 
-      margin-bottom: 20px; 
-    }
-    .form-label { 
-      display: block; 
-      margin-bottom: 8px; 
-      font-weight: 600; 
-    }
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; margin-bottom: 8px; font-weight: 600; }
     .form-input {
       width: 100%;
       padding: 12px;
@@ -632,31 +600,15 @@
       margin-top: 20px;
     }
 
-    .submit-btn:hover { 
-      background: var(--primary-dark); 
-    }
-    .submit-btn.error { 
-      background: var(--error); 
-    }
-    .submit-btn.success { 
-      background: var(--success); 
-    }
+    .submit-btn:hover { background: var(--primary-dark); }
+    .submit-btn.error { background: var(--error); }
+    .submit-btn.success { background: var(--success); }
 
     @media (max-width: 768px) {
-      .post-image-container { 
-        height: 300px; 
-      }
-      .profile-avatar { 
-        width: 100px; 
-        height: 100px; 
-      }
-      .profile-username { 
-        font-size: 20px; 
-      }
-      .wallet-btn, .wallet-address { 
-        padding: 10px 20px; 
-        font-size: 14px; 
-      }
+      .post-image-container { height: 300px; }
+      .profile-avatar { width: 100px; height: 100px; }
+      .profile-username { font-size: 20px; }
+      .wallet-btn, .wallet-address { padding: 10px 20px; font-size: 14px; }
     }
   </style>
 </head>
@@ -683,7 +635,7 @@
     
     <div class="post-container">
       <div class="post-image-container">
-        <img src="https://i.imgur.com/muoYEIu.jpeg" class="post-image" alt="Post" />
+        <img src="https://i.imgur.com/muoYEIu.jpeg" class="post-image" alt="Post">
         <div class="post-overlay">
           <h3 class="post-title">@faruser1</h3>
           <p class="post-description">Like this post to earn 1 COIN. Verify after liking.</p>
@@ -779,7 +731,7 @@
     </div>
     
     <div class="profile-content">
-      <img src="https://i.imgur.com/ABCD5678.jpg" class="profile-avatar" alt="Profile" />
+      <img src="https://i.imgur.com/ABCD5678.jpg" class="profile-avatar" alt="Profile">
       <div class="profile-username">@yourusername</div>
       
       <div class="profile-stats">
@@ -888,22 +840,22 @@
       
       <div class="form-group">
         <label class="form-label" id="order-link-label">Post Link</label>
-        <input type="text" class="form-input" id="order-link" placeholder="https://warpcast.com/yourusername/0x123456" />
+        <input type="text" class="form-input" id="order-link" placeholder="https://warpcast.com/yourusername/0x123456">
       </div>
       
       <div class="form-group">
         <label class="form-label">Your Wallet Address</label>
-        <input type="text" class="form-input" id="wallet-address" readonly />
+        <input type="text" class="form-input" id="wallet-address" readonly>
       </div>
       
       <div class="form-group">
         <label class="form-label">Package</label>
-        <input type="text" class="form-input" id="package-name" readonly />
+        <input type="text" class="form-input" id="package-name" readonly>
       </div>
       
       <div class="form-group">
         <label class="form-label">Price</label>
-        <input type="text" class="form-input" id="package-price" readonly />
+        <input type="text" class="form-input" id="package-price" readonly>
       </div>
       
       <button class="submit-btn" id="submit-order-btn" onclick="submitOrder()">
@@ -928,168 +880,42 @@
     </div>
   </div>
 
-  <script>
-    let authClient = null;
+  <script type="module">
+    import sdk from 'https://esm.sh/@farcaster/frame-sdk';
+
+    let provider, signer, address;
     let currentPage = 'home-page';
     let previousPage = 'home-page';
     let currentOrder = null;
 
+    // Initialize App
     document.addEventListener('DOMContentLoaded', async () => {
       try {
-        if (typeof farcasterAuth === 'undefined') {
-          throw new Error('Farcaster SDK not loaded. Please check your internet connection.');
-        }
-
-        authClient = new farcasterAuth.AuthClient({
-          relay: 'https://relay.farcaster.xyz',
-          rpcUrl: 'https://mainnet.optimism.io',
-          domain: window.location.hostname,
-        });
-
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        const status = await authClient.connect();
-        if (status.isAuthenticated) {
-          handleWalletConnection(status.user);
-        }
-
+        await sdk.actions.ready();
+        const context = await sdk.context;
+        console.log("Farcaster Ready:", context);
+        
+        initializeApp();
         document.body.style.opacity = 1;
         document.getElementById('loading').style.display = 'none';
-        createStars();
       } catch (error) {
         console.error("Initialization Error:", error);
         document.getElementById('loading').style.display = 'none';
-        alert(`Initialization Failed: ${error.message}`);
+        document.body.innerHTML = `<div class="error">Failed to initialize. Please refresh.</div>`;
       }
     });
 
-    async function connectWallet() {
-      try {
-        if (!authClient) {
-          throw new Error('Authentication client not initialized');
-        }
-
-        const { user, error } = await authClient.authenticate({
-          siweUri: window.location.href,
-          timeout: 60000,
-        });
-
-        if (error) throw new Error(error);
-        if (!user) throw new Error('Authentication failed');
-
-        handleWalletConnection(user);
-        localStorage.setItem('farcaster-auth', JSON.stringify(user));
-      } catch (error) {
-        console.error("Wallet Connection Error:", error);
-        alert(`Connection Failed: ${error.message}`);
-      }
+    function initializeApp() {
+      createStars();
+      setupWalletConnections();
     }
 
-    function handleWalletConnection(user) {
-      document.querySelectorAll('.wallet-btn').forEach(btn => {
-        btn.style.display = 'none';
-      });
-
-      document.querySelectorAll('.wallet-address').forEach(div => {
-        div.style.display = 'block';
-        div.textContent = `${user.address.slice(0, 6)}...${user.address.slice(-4)}`;
-      });
-    }
-
-    window.showPage = function(pageId) {
-      previousPage = currentPage;
-      currentPage = pageId;
-
-      document.querySelectorAll('.page').forEach(page => {
-        page.classList.remove('active');
-      });
-
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
-
-      document.getElementById(pageId).classList.add('active');
-
-      if (['home-page', 'leaderboard-page', 'profile-page'].includes(pageId)) {
-        const selector = `.tab-btn[onclick="showPage('${pageId}')"]`;
-        document.querySelector(selector).classList.add('active');
-      }
-    };
-
-    window.goBack = function() {
-      showPage(previousPage);
-    };
-
-    window.skipPost = function() {
-      alert('Post skipped! Loading next...');
-    };
-
-    window.viewPost = function() {
-      window.open('https://warpcast.com/faruser1/0x0a6d75f4', '_blank');
-    };
-
-    window.likePost = function() {
-      const confirmed = confirm('Did you like this post?');
-      if (confirmed) {
-        alert('+1 COIN!');
-      } else {
-        alert('Please like the post first!');
-      }
-    };
-
-    window.startOrder = function(type, coins, inputType) {
-      const walletAddress = document.querySelector('.wallet-address').textContent;
-      if (!walletAddress || walletAddress === '') {
-        alert('Please connect your wallet first!');
-        return;
-      }
-
-      currentOrder = {
-        type: type,
-        coins: coins,
-        inputType: inputType,
-      };
-
-      document.getElementById('order-form-title').textContent = `Order: ${type}`;
-      document.getElementById('package-name').value = type;
-      document.getElementById('package-price').value = `${coins} COINS`;
-      document.getElementById('wallet-address').value = walletAddress;
-      document.getElementById('order-link-label').textContent = inputType === 'post' ? 'Post Link' : 'Profile Link';
-
-      showPage('order-form-page');
-    };
-
-    window.submitOrder = function() {
-      const linkInput = document.getElementById('order-link');
-      const submitBtn = document.getElementById('submit-order-btn');
-      
-      if (!linkInput.value.trim()) {
-        submitBtn.textContent = 'Invalid Link!';
-        submitBtn.classList.add('error');
-        setTimeout(() => {
-          submitBtn.textContent = 'Confirm Order';
-          submitBtn.classList.remove('error');
-        }, 2000);
-        return;
-      }
-
-      submitBtn.textContent = 'Processing...';
-      setTimeout(() => {
-        submitBtn.textContent = 'Order Submitted!';
-        submitBtn.classList.add('success');
-        setTimeout(() => {
-          showPage('profile-page');
-          submitBtn.textContent = 'Confirm Order';
-          submitBtn.classList.remove('success');
-        }, 1500);
-      }, 1000);
-    };
-
+    // Star Animation
     function createStars() {
       const starsContainer = document.getElementById('stars');
       for (let i = 0; i < 100; i++) {
         const star = document.createElement('div');
-        star.className = 'star';
+        star.classList.add('star');
         star.style.left = `${Math.random() * 100}%`;
         star.style.top = `${Math.random() * 100}%`;
         star.style.width = `${Math.random() * 3 + 1}px`;
@@ -1100,9 +926,92 @@
       }
     }
 
-    document.querySelectorAll('.wallet-btn').forEach(btn => {
-      btn.addEventListener('click', connectWallet);
-    });
+    // Wallet Connections
+    function setupWalletConnections() {
+      document.querySelectorAll('.wallet-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          try {
+            if (window.sdk?.wallet?.ethProvider) {
+              provider = new ethers.BrowserProvider(window.sdk.wallet.ethProvider);
+              await provider.send("eth_requestAccounts", []);
+              signer = await provider.getSigner();
+              address = await signer.getAddress();
+
+              document.querySelectorAll('.wallet-btn').forEach(b => b.style.display = 'none');
+              document.querySelectorAll('.wallet-address').forEach(div => {
+                div.style.display = 'block';
+                div.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
+              });
+            } else {
+              alert('Please open in Warpcast to connect wallet');
+            }
+          } catch (error) {
+            console.error("Connection failed:", error);
+          }
+        });
+      });
+    }
+
+    // Page Navigation
+    function showPage(pageId) {
+      previousPage = currentPage;
+      currentPage = pageId;
+      
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      
+      document.getElementById(pageId).classList.add('active');
+      
+      if (['home-page', 'leaderboard-page', 'profile-page'].includes(pageId)) {
+        document.querySelector(`.tab-btn[onclick="showPage('${pageId}')"]`).classList.add('active');
+      }
+    }
+
+    function goBack() {
+      showPage(previousPage);
+    }
+
+    // Post Actions
+    function skipPost() { alert('Post skipped! Loading next...'); }
+    function viewPost() { window.open('https://warpcast.com/faruser1/0x0a6d75f4', '_blank'); }
+    function likePost() { confirm('Did you like this post?') ? alert('+1 COIN!') : alert('Please like first!'); }
+
+    // Order System
+    function startOrder(type, coins, inputType) {
+      if (!address) return alert('Connect wallet first!');
+      
+      currentOrder = { type, coins, inputType };
+      document.getElementById('order-form-title').textContent = `Order: ${type}`;
+      document.getElementById('package-name').value = type;
+      document.getElementById('package-price').value = `${coins} COINS`;
+      document.getElementById('wallet-address').value = address;
+      
+      document.getElementById('order-link-label').textContent = inputType === 'post' ? 'Post Link' : 'Profile Link';
+      showPage('order-form-page');
+    }
+
+    function submitOrder() {
+      const link = document.getElementById('order-link').value.trim();
+      const submitBtn = document.getElementById('submit-order-btn');
+      
+      if (!link) {
+        submitBtn.textContent = 'Invalid link!';
+        submitBtn.classList.add('error');
+        setTimeout(() => {
+          submitBtn.textContent = 'Confirm Order';
+          submitBtn.classList.remove('error');
+        }, 2000);
+        return;
+      }
+      
+      submitBtn.textContent = 'Order Submitted!';
+      submitBtn.classList.add('success');
+      setTimeout(() => {
+        showPage('profile-page');
+        submitBtn.textContent = 'Confirm Order';
+        submitBtn.classList.remove('success');
+      }, 2000);
+    }
   </script>
 </body>
 </html>
