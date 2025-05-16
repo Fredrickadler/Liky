@@ -8,7 +8,7 @@
   <!-- Farcaster Meta -->
   <meta name="fc:frame" content='{
     "version":"next",
-    "imageUrl":"https://i.imgur.com/dDpcwCa.jpeg",
+    "imageUrl":"https://i.imgur.com/UxZ1DqS_d.webp?maxwidth=1520&fidelity=grand",
     "button":{
       "title":"Liky Mini App",
       "action":{
@@ -26,7 +26,6 @@
   
   <!-- Other Dependencies -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
@@ -627,7 +626,7 @@
       <div class="add-order-btn" onclick="showPage('order-page')">
         <i class="fas fa-plus"></i>
       </div>
-      <button class="wallet-btn" id="connectWallet">
+      <button class="wallet-btn" onclick="connectWallet()">
         <i class="fas fa-wallet"></i> Connect Wallet
       </button>
       <div class="wallet-address" id="walletAddress"></div>
@@ -675,7 +674,7 @@
       <div class="add-order-btn" onclick="showPage('order-page')">
         <i class="fas fa-plus"></i>
       </div>
-      <button class="wallet-btn" id="connectWallet2">
+      <button class="wallet-btn" onclick="connectWallet()">
         <i class="fas fa-wallet"></i> Connect Wallet
       </button>
       <div class="wallet-address" id="walletAddress2"></div>
@@ -724,7 +723,7 @@
       <div class="add-order-btn" onclick="showPage('order-page')">
         <i class="fas fa-plus"></i>
       </div>
-      <button class="wallet-btn" id="connectWallet3">
+      <button class="wallet-btn" onclick="connectWallet()">
         <i class="fas fa-wallet"></i> Connect Wallet
       </button>
       <div class="wallet-address" id="walletAddress3"></div>
@@ -775,7 +774,7 @@
       <button class="back-btn" onclick="goBack()">
         <i class="fas fa-arrow-left"></i>
       </button>
-      <button class="wallet-btn" id="connectWallet4">
+      <button class="wallet-btn" onclick="connectWallet()">
         <i class="fas fa-wallet"></i> Connect Wallet
       </button>
       <div class="wallet-address" id="walletAddress4"></div>
@@ -829,7 +828,7 @@
       <button class="back-btn" onclick="showPage('order-page')">
         <i class="fas fa-arrow-left"></i>
       </button>
-      <button class="wallet-btn" id="connectWallet5">
+      <button class="wallet-btn" onclick="connectWallet()">
         <i class="fas fa-wallet"></i> Connect Wallet
       </button>
       <div class="wallet-address" id="walletAddress5"></div>
@@ -883,11 +882,12 @@
   <script type="module">
     import sdk from 'https://esm.sh/@farcaster/frame-sdk';
 
-    let provider, signer, address;
+    let provider, address;
     let currentPage = 'home-page';
     let previousPage = 'home-page';
     let currentOrder = null;
 
+    // Initialize App
     document.addEventListener('DOMContentLoaded', async () => {
       try {
         await sdk.actions.ready();
@@ -907,8 +907,6 @@
     function initializeApp() {
       createStars();
       setupWalletConnections();
-      
-      // Expose functions to global scope
       window.showPage = showPage;
       window.goBack = goBack;
       window.skipPost = skipPost;
@@ -916,8 +914,10 @@
       window.likePost = likePost;
       window.startOrder = startOrder;
       window.submitOrder = submitOrder;
+      window.connectWallet = connectWallet;
     }
 
+    // Star Animation
     function createStars() {
       const starsContainer = document.getElementById('stars');
       for (let i = 0; i < 100; i++) {
@@ -933,35 +933,36 @@
       }
     }
 
-    function setupWalletConnections() {
-      const walletButtons = document.querySelectorAll('.wallet-btn');
-      const walletAddresses = document.querySelectorAll('.wallet-address');
+    // Wallet Connection Logic
+    async function connectWallet() {
+      try {
+        if (!sdk.wallet?.ethProvider) {
+          alert('Please open in Warpcast to connect wallet');
+          return;
+        }
 
-      walletButtons.forEach(btn => {
-        btn.addEventListener('click', async () => {
-          try {
-            if (!window.sdk?.wallet?.ethProvider) {
-              alert('Please open in Warpcast to connect wallet');
-              return;
-            }
+        provider = sdk.wallet.ethProvider;
+        const accounts = await provider.request({ method: 'eth_requestAccounts' });
+        address = accounts[0];
 
-            provider = new ethers.BrowserProvider(window.sdk.wallet.ethProvider);
-            await provider.send("eth_requestAccounts", []);
-            signer = await provider.getSigner();
-            address = await signer.getAddress();
-
-            walletButtons.forEach(b => b.style.display = 'none');
-            walletAddresses.forEach(div => {
-              div.style.display = 'block';
-              div.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
-            });
-          } catch (error) {
-            console.error("Connection failed:", error);
-          }
+        // Update all wallet address displays
+        document.querySelectorAll('.wallet-address').forEach(el => {
+          el.textContent = `Connected: ${address.slice(0, 6)}...${address.slice(-4)}`;
+          el.style.display = 'block';
         });
-      });
+
+        // Hide all wallet buttons
+        document.querySelectorAll('.wallet-btn').forEach(btn => {
+          btn.style.display = 'none';
+        });
+
+      } catch (error) {
+        console.error("Wallet connection failed:", error);
+        alert('Wallet connection failed');
+      }
     }
 
+    // Page Navigation
     function showPage(pageId) {
       previousPage = currentPage;
       currentPage = pageId;
@@ -980,10 +981,12 @@
       showPage(previousPage);
     }
 
+    // Post Actions
     function skipPost() { alert('Post skipped! Loading next...'); }
     function viewPost() { window.open('https://warpcast.com/faruser1/0x0a6d75f4', '_blank'); }
     function likePost() { confirm('Did you like this post?') ? alert('+1 COIN!') : alert('Please like first!'); }
 
+    // Order System
     function startOrder(type, coins, inputType) {
       if (!address) return alert('Connect wallet first!');
       
