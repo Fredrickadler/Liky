@@ -10,7 +10,7 @@
     "iconUrl": "https://liky-omega.vercel.app/icon.png",
     "homeUrl": "‏https://liky-omega.vercel.app",
     "splashImageUrl": "https://liky-omega.vercel.app/splash.png",
-    "splashBackgroundColor": "#eeccff",
+    "splashBackgroundColor": "#2E2E2E",
     "webhookUrl": "https://liky-omega.vercel.app/api/webhook"
   }
 }
