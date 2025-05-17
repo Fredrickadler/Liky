@@ -8,7 +8,7 @@
     "version": "1",
     "name": "Liky...!",
     "iconUrl": "https://liky-omega.vercel.app/icon.png",
-    "homeUrl": "‏https://liky-omega.vercel.app",
+    "homeUrl": "https://liky-omega.vercel.app",
     "splashImageUrl": "https://liky-omega.vercel.app/splash.png",
     "splashBackgroundColor": "#2E2E2E",
     "webhookUrl": "https://liky-omega.vercel.app/api/webhook"
