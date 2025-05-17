@@ -882,13 +882,10 @@
     </div>
   </div>
 
-<script>
-  let provider, address;
-  let currentPage = 'home-page';
-  let previousPage = 'home-page';
-  let currentOrder = null;
-  let isConnected = false;
 
+
+
+<script>
   function loadUserProfile() {
     const user = window.sdk?.context?.user;
 
@@ -907,25 +904,31 @@
     console.log("User loaded:", user);
   }
 
-  document.addEventListener('DOMContentLoaded', async () => {
-    try {
-      await window.sdk.actions.ready();
-      const context = window.sdk.context;
+  document.addEventListener('DOMContentLoaded', () => {
+    const waitForSdk = setInterval(async () => {
+      if (window.sdk && window.sdk.actions && window.sdk.actions.ready) {
+        clearInterval(waitForSdk);
 
-      if (!context?.user) {
-        console.error("No user in context:", context);
-      } else {
-        window.sdkContext = context;
-        loadUserProfile();
+        try {
+          await window.sdk.actions.ready();
+          const context = window.sdk.context;
+
+          if (!context?.user) {
+            console.error("No user in context:", context);
+          } else {
+            window.sdkContext = context;
+            loadUserProfile();
+          }
+
+          document.body.style.opacity = 1;
+          document.getElementById('loading').style.display = 'none';
+        } catch (error) {
+          console.error("Initialization Error:", error);
+          document.getElementById('loading').style.display = 'none';
+          document.body.innerHTML = `<div class="error">Initialization Failed</div>`;
+        }
       }
-
-      document.body.style.opacity = 1;
-      document.getElementById('loading').style.display = 'none';
-    } catch (error) {
-      console.error("Initialization Error:", error);
-      document.getElementById('loading').style.display = 'none';
-      document.body.innerHTML = `<div class="error">Initialization Failed</div>`;
-    }
+    }, 100);
   });
 </script>
 
