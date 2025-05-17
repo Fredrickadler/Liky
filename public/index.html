@@ -25,12 +25,235 @@
   <script type="module">
     import sdk from "https://esm.sh/@farcaster/frame-sdk";
 
-    window.addEventListener('DOMContentLoaded', () => {
-      sdk.actions.ready();
+    let currentUserProfile = null;
+    let provider, address;
+    let currentPage = 'home-page';
+    let previousPage = 'home-page';
+    let currentOrder = null;
+    let isConnected = false;
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        await sdk.actions.ready();
+        
+        const user = sdk.state.getFarUser();
+        console.log("Farcaster User:", user);
+
+        if(user && user.fid) {
+          const apiKey = "D8460DB2-32C8-45E0-8C56-0ACB0FE02C29";
+          const profileRes = await fetch("https://api.neynar.com/v2/farcaster/user/bulk", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "api_key": apiKey,
+            },
+            body: JSON.stringify({ fids: [user.fid] })
+          });
+          
+          if(profileRes.ok) {
+            currentUserProfile = (await profileRes.json()).users[0];
+            console.log("User Profile Data:", currentUserProfile);
+          }
+        }
+
+        document.getElementById('loading').style.display = 'none';
+        document.body.style.opacity = 1;
+        initializeApp();
+      } catch (error) {
+        console.error("Initialization Error:", error);
+        document.getElementById('loading').style.display = 'none';
+        document.body.innerHTML = `<div class="error">خطا در بارگذاری! لطفاً دوباره تلاش کنید</div>`;
+      }
     });
+
+    function initializeApp() {
+      createStars();
+      window.showPage = showPage;
+      window.goBack = goBack;
+      window.skipPost = skipPost;
+      window.viewPost = viewPost;
+      window.likePost = likePost;
+      window.startOrder = startOrder;
+      window.submitOrder = submitOrder;
+      window.toggleWallet = toggleWallet;
+      
+      if(currentUserProfile) loadUserProfile();
+    }
+
+    function loadUserProfile() {
+      if(!currentUserProfile) {
+        console.warn("No profile data available");
+        return;
+      }
+      
+      const avatarElem = document.getElementById("profile-avatar");
+      const usernameElem = document.getElementById("profile-username");
+      
+      avatarElem.src = currentUserProfile.pfp_url || 'https://i.imgur.com/ABCD5678.jpg';
+      avatarElem.onerror = () => {
+        avatarElem.src = 'https://i.imgur.com/ABCD5678.jpg';
+      };
+      
+      usernameElem.textContent = `@${currentUserProfile.username || 'unknown'}`;
+    }
+
+    function showPage(pageId) {
+      previousPage = currentPage;
+      currentPage = pageId;
+      
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      
+      document.getElementById(pageId).classList.add('active');
+      
+      if(['home-page','leaderboard-page','profile-page'].includes(pageId)) {
+        document.querySelector(`.tab-btn[onclick="showPage('${pageId}')"]`).classList.add('active');
+      }
+
+      if(pageId === 'profile-page') {
+        loadUserProfile();
+      }
+    }
+
+    function createStars() {
+      const starsContainer = document.getElementById('stars');
+      starsContainer.innerHTML = '';
+      
+      for(let i = 0; i < 100; i++) {
+        const star = document.createElement('div');
+        star.classList.add('star');
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.width = `${Math.random() * 3 + 1}px`;
+        star.style.height = star.style.width;
+        star.style.animationDelay = `${Math.random() * 3}s`;
+        star.style.animationDuration = `${Math.random() * 30 + 20}s`;
+        starsContainer.appendChild(star);
+      }
+    }
+
+    async function toggleWallet() {
+      if(isConnected) {
+        disconnectWallet();
+      } else {
+        await connectWallet();
+      }
+    }
+
+    async function connectWallet() {
+      try {
+        if(!sdk.wallet?.ethProvider) {
+          alert('Please open in Warpcast to connect wallet');
+          return;
+        }
+
+        provider = sdk.wallet.ethProvider;
+        const accounts = await provider.request({ method: 'eth_requestAccounts' });
+        address = accounts[0];
+        isConnected = true;
+
+        document.querySelectorAll('.wallet-address').forEach(el => {
+          el.textContent = `${address.slice(0,6)}...${address.slice(-4)}`;
+          el.style.display = 'block';
+        });
+
+        document.querySelectorAll('.wallet-btn').forEach(btn => {
+          btn.style.display = 'none';
+        });
+
+      } catch(error) {
+        console.error("Wallet connection failed:", error);
+      }
+    }
+
+    function disconnectWallet() {
+      isConnected = false;
+      address = null;
+      document.querySelectorAll('.wallet-address').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.wallet-btn').forEach(btn => btn.style.display = 'block');
+    }
+
+    function goBack() {
+      showPage(previousPage);
+    }
+
+    function skipPost() { alert('Post skipped! Loading next...'); }
+    function viewPost() { window.open('https://warpcast.com/faruser1/0x0a6d75f4', '_blank'); }
+    function likePost() { confirm('Did you like this post?') ? alert('+1 COIN!') : alert('Please like first!'); }
+
+    function startOrder(type, coins, inputType) {
+      if(!address) return alert('Connect wallet first!');
+      
+      currentOrder = { type, coins, inputType };
+      document.getElementById('order-form-title').textContent = `Order: ${type}`;
+      document.getElementById('package-name').value = type;
+      document.getElementById('package-price').value = `${coins} COINS`;
+      document.getElementById('wallet-address').value = address;
+      
+      document.getElementById('order-link-label').textContent = inputType === 'post' ? 'Post Link' : 'Profile Link';
+      showPage('order-form-page');
+    }
+
+    function submitOrder() {
+      const link = document.getElementById('order-link').value.trim();
+      const submitBtn = document.getElementById('submit-order-btn');
+      
+      if(!link) {
+        submitBtn.textContent = 'Invalid link!';
+        submitBtn.classList.add('error');
+        setTimeout(() => {
+          submitBtn.textContent = 'Confirm Order';
+          submitBtn.classList.remove('error');
+        }, 2000);
+        return;
+      }
+      
+      submitBtn.textContent = 'Order Submitted!';
+      submitBtn.classList.add('success');
+      setTimeout(() => {
+        showPage('profile-page');
+        submitBtn.textContent = 'Confirm Order';
+        submitBtn.classList.remove('success');
+      }, 2000);
+    }
+
+    async function verifyCastFromLink() {
+      const apiKey = "D8460DB2-32C8-45E0-8C56-0ACB0FE02C29";
+      const input = document.getElementById("order-link").value.trim();
+      const castHash = input.split("/").pop();
+
+      if(!castHash.startsWith("0x")) {
+        alert("Invalid post link");
+        return;
+      }
+
+      const castRes = await fetch(`https://api.neynar.com/v2/farcaster/cast?cast_hash=${castHash}`, {
+        headers: { "api_key": apiKey }
+      });
+      const cast = (await castRes.json()).cast;
+
+      document.getElementById("verified-post-title").textContent = "@" + cast.author.username;
+      document.getElementById("verified-post-text").textContent = cast.text;
+      if(cast.embeds?.[0]?.url) {
+        document.getElementById("verified-post-img").src = cast.embeds[0].url;
+      }
+      document.getElementById("verified-post").style.display = "block";
+
+      const currentUser = sdk.state.getFarUser();
+      const reactionRes = await fetch(`https://api.neynar.com/v2/farcaster/cast/reactions?cast_hash=${castHash}`, {
+        headers: { "api_key": apiKey }
+      });
+      const reactions = (await reactionRes.json()).reactions;
+
+      const liked = reactions.some(r => r.reaction_type === "like" && r.fid === currentUser.fid);
+      if(liked) {
+        alert("✅ Verified! You liked this post. +1 COIN!");
+      } else {
+        alert("❌ You haven't liked this post yet.");
+      }
+    }
   </script>
 
-  <!-- Other Dependencies -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -718,7 +941,7 @@
     </div>
   </div>
 
-  <!-- تغییرات اینجا: Profile Page -->
+  <!-- Profile Page -->
   <div class="page" id="profile-page">
     <div class="header">
       <div class="add-order-btn" onclick="showPage('order-page')">
@@ -731,7 +954,6 @@
     </div>
     
     <div class="profile-content">
-      <!-- تغییرات ID اضافه شده -->
       <img id="profile-avatar" src="" class="profile-avatar" alt="Profile">
       <div id="profile-username" class="profile-username">@username</div>
       
@@ -888,238 +1110,5 @@
       <span>Profile</span>
     </div>
   </div>
-
-  <script type="module">
-    import sdk from 'https://esm.sh/@farcaster/frame-sdk';
-
-    let provider, address;
-    let currentPage = 'home-page';
-    let previousPage = 'home-page';
-    let currentOrder = null;
-    let isConnected = false;
-
-    document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        await sdk.actions.ready();
-        document.body.style.opacity = 1;
-        document.getElementById('loading').style.display = 'none';
-        initializeApp();
-      } catch (error) {
-        console.error("Initialization Error:", error);
-        document.getElementById('loading').style.display = 'none';
-        document.body.innerHTML = `<div class="error">Failed to initialize. Please refresh.</div>`;
-      }
-    });
-
-    function initializeApp() {
-      createStars();
-      window.showPage = showPage;
-      window.goBack = goBack;
-      window.skipPost = skipPost;
-      window.viewPost = viewPost;
-      window.likePost = likePost;
-      window.startOrder = startOrder;
-      window.submitOrder = submitOrder;
-      window.toggleWallet = toggleWallet;
-    }
-
-    // تغییرات تابع loadUserProfile اضافه شد
-    async function loadUserProfile() {
-      try {
-        const apiKey = "D8460DB2-32C8-45E0-8C56-0ACB0FE02C29";
-        const user = sdk.state.getFarUser();
-        if (!user) {
-          console.log("No user found");
-          return;
-        }
-
-        const profileRes = await fetch("https://api.neynar.com/v2/farcaster/user/bulk", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "api_key": apiKey,
-          },
-          body: JSON.stringify({ fids: [user.fid] })
-        });
-
-        if (!profileRes.ok) throw new Error('Failed to fetch profile');
-        
-        const data = await profileRes.json();
-        const profile = data.users[0];
-        
-        document.getElementById("profile-avatar").src = profile.pfp_url;
-        document.getElementById("profile-username").textContent = `@${profile.username}`;
-      } catch (error) {
-        console.error("Error loading profile:", error);
-      }
-    }
-
-    function showPage(pageId) {
-      previousPage = currentPage;
-      currentPage = pageId;
-      
-      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      
-      document.getElementById(pageId).classList.add('active');
-      
-      if (['home-page', 'leaderboard-page', 'profile-page'].includes(pageId)) {
-        document.querySelector(`.tab-btn[onclick="showPage('${pageId}')"]`).classList.add('active');
-      }
-
-      // تغییرات اینجا: فراخوانی تابع هنگام نمایش پروفایل
-      if (pageId === "profile-page") {
-        loadUserProfile();
-      }
-    }
-
-    // بقیه توابع بدون تغییر...
-    async function toggleWallet() {
-      if (isConnected) {
-        disconnectWallet();
-      } else {
-        await connectWallet();
-      }
-    }
-
-    async function connectWallet() {
-      try {
-        if (!sdk.wallet?.ethProvider) {
-          alert('Please open in Warpcast to connect wallet');
-          return;
-        }
-
-        provider = sdk.wallet.ethProvider;
-        const accounts = await provider.request({ method: 'eth_requestAccounts' });
-        address = accounts[0];
-        isConnected = true;
-
-        document.querySelectorAll('.wallet-address').forEach(el => {
-          el.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
-          el.style.display = 'block';
-        });
-
-        document.querySelectorAll('.wallet-btn').forEach(btn => {
-          btn.style.display = 'none';
-        });
-
-      } catch (error) {
-        console.error("Wallet connection failed:", error);
-      }
-    }
-
-    function disconnectWallet() {
-      isConnected = false;
-      address = null;
-      document.querySelectorAll('.wallet-address').forEach(el => {
-        el.style.display = 'none';
-      });
-      document.querySelectorAll('.wallet-btn').forEach(btn => {
-        btn.style.display = 'block';
-      });
-    }
-
-    function createStars() {
-      const starsContainer = document.getElementById('stars');
-      starsContainer.innerHTML = '';
-      
-      setTimeout(() => {
-        for (let i = 0; i < 100; i++) {
-          const star = document.createElement('div');
-          star.classList.add('star');
-          star.style.left = `${Math.random() * 100}%`;
-          star.style.top = `${Math.random() * 100}%`;
-          star.style.width = `${Math.random() * 3 + 1}px`;
-          star.style.height = star.style.width;
-          star.style.animationDelay = `${Math.random() * 3}s`;
-          star.style.animationDuration = `${Math.random() * 30 + 20}s`;
-          star.style.opacity = '0.3';
-          starsContainer.appendChild(star);
-        }
-      }, 500);
-    }
-
-    function goBack() {
-      showPage(previousPage);
-    }
-
-    function skipPost() { alert('Post skipped! Loading next...'); }
-    function viewPost() { window.open('https://warpcast.com/faruser1/0x0a6d75f4', '_blank'); }
-    function likePost() { confirm('Did you like this post?') ? alert('+1 COIN!') : alert('Please like first!'); }
-
-    function startOrder(type, coins, inputType) {
-      if (!address) return alert('Connect wallet first!');
-      
-      currentOrder = { type, coins, inputType };
-      document.getElementById('order-form-title').textContent = `Order: ${type}`;
-      document.getElementById('package-name').value = type;
-      document.getElementById('package-price').value = `${coins} COINS`;
-      document.getElementById('wallet-address').value = address;
-      
-      document.getElementById('order-link-label').textContent = inputType === 'post' ? 'Post Link' : 'Profile Link';
-      showPage('order-form-page');
-    }
-
-    function submitOrder() {
-      const link = document.getElementById('order-link').value.trim();
-      const submitBtn = document.getElementById('submit-order-btn');
-      
-      if (!link) {
-        submitBtn.textContent = 'Invalid link!';
-        submitBtn.classList.add('error');
-        setTimeout(() => {
-          submitBtn.textContent = 'Confirm Order';
-          submitBtn.classList.remove('error');
-        }, 2000);
-        return;
-      }
-      
-      submitBtn.textContent = 'Order Submitted!';
-      submitBtn.classList.add('success');
-      setTimeout(() => {
-        showPage('profile-page');
-        submitBtn.textContent = 'Confirm Order';
-        submitBtn.classList.remove('success');
-      }, 2000);
-
-      verifyCastFromLink();
-    }
-
-    async function verifyCastFromLink() {
-      const apiKey = "D8460DB2-32C8-45E0-8C56-0ACB0FE02C29";
-      const input = document.getElementById("order-link").value.trim();
-      const castHash = input.split("/").pop();
-
-      if (!castHash.startsWith("0x")) {
-        alert("Invalid post link");
-        return;
-      }
-
-      const castRes = await fetch(`https://api.neynar.com/v2/farcaster/cast?cast_hash=${castHash}`, {
-        headers: { "api_key": apiKey }
-      });
-      const cast = (await castRes.json()).cast;
-
-      document.getElementById("verified-post-title").textContent = "@" + cast.author.username;
-      document.getElementById("verified-post-text").textContent = cast.text;
-      if (cast.embeds?.[0]?.url) {
-        document.getElementById("verified-post-img").src = cast.embeds[0].url;
-      }
-      document.getElementById("verified-post").style.display = "block";
-
-      const currentUser = sdk.state.getFarUser();
-      const reactionRes = await fetch(`https://api.neynar.com/v2/farcaster/cast/reactions?cast_hash=${castHash}`, {
-        headers: { "api_key": apiKey }
-      });
-      const reactions = (await reactionRes.json()).reactions;
-
-      const liked = reactions.some(r => r.reaction_type === "like" && r.fid === currentUser.fid);
-      if (liked) {
-        alert("✅ Verified! You liked this post. +1 COIN!");
-      } else {
-        alert("❌ You haven't liked this post yet.");
-      }
-    }
-  </script>
 </body>
 </html>
