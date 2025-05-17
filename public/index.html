@@ -76,6 +76,14 @@ function loadUserProfile() {
     document.addEventListener('DOMContentLoaded', async () => {
       try {
         await sdk.actions.ready();
+const context = sdk.context;
+
+if (!context?.user) {
+  console.error("No user in context:", context);
+} else {
+  window.sdkContext = context;
+  loadUserProfile(); // فقط بعد از آماده‌شدن context
+}
         window.sdkContext = sdk.context;
         document.body.style.opacity = 1;
         document.getElementById('loading').style.display = 'none';
@@ -112,9 +120,7 @@ function loadUserProfile() {
         document.querySelector(`.tab-btn[onclick="showPage('${pageId}')"]`).classList.add('active');
       }
 
-      if (pageId === "profile-page") {
-        loadUserProfile();
-      }
+      
     }
 
     function createStars() {
