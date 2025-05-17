@@ -33,10 +33,11 @@
 
     async function loadUserProfile() {
       const apiKey = "D8460DB2-32C8-45E0-8C56-0ACB0FE02C29";
-      const user = sdk.state.getFarUser();
-      
-      if (!user) {
-        console.error("User not found");
+      const context = await sdk.context;
+      console.log("Context:", context);
+
+      if (!context?.user?.fid) {
+        console.error("User fid not found in context");
         return;
       }
 
@@ -47,7 +48,7 @@
             "Content-Type": "application/json",
             "api_key": apiKey
           },
-          body: JSON.stringify({ fids: [user.fid] })
+          body: JSON.stringify({ fids: [context.user.fid] })
         });
 
         const data = await res.json();
