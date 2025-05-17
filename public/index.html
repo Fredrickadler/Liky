@@ -31,6 +31,37 @@
     let currentOrder = null;
     let isConnected = false;
 
+    async function loadUserProfile() {
+      const apiKey = "D8460DB2-32C8-45E0-8C56-0ACB0FE02C29";
+      const user = sdk.state.getFarUser();
+      
+      if (!user) {
+        console.error("User not found");
+        return;
+      }
+
+      try {
+        const res = await fetch("https://api.neynar.com/v2/farcaster/user/bulk", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "api_key": apiKey
+          },
+          body: JSON.stringify({ fids: [user.fid] })
+        });
+
+        const data = await res.json();
+        const profile = data.users?.[0];
+
+        if (profile) {
+          document.getElementById("profile-avatar").src = profile.pfp_url;
+          document.getElementById("profile-username").textContent = `@${profile.username}`;
+        }
+      } catch (error) {
+        console.error("Profile load failed:", error);
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
       try {
         await sdk.actions.ready();
@@ -40,7 +71,7 @@
       } catch (error) {
         console.error("Initialization Error:", error);
         document.getElementById('loading').style.display = 'none';
-        document.body.innerHTML = `<div class="error">Failed to initialize. Please refresh.</div>`;
+        document.body.innerHTML = `<div class="error">Initialization Failed</div>`;
       }
     });
 
@@ -56,49 +87,22 @@
       window.toggleWallet = toggleWallet;
     }
 
-    async function toggleWallet() {
-      if (isConnected) {
-        disconnectWallet();
-      } else {
-        await connectWallet();
+    function showPage(pageId) {
+      previousPage = currentPage;
+      currentPage = pageId;
+      
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      
+      document.getElementById(pageId).classList.add('active');
+      
+      if (['home-page', 'leaderboard-page', 'profile-page'].includes(pageId)) {
+        document.querySelector(`.tab-btn[onclick="showPage('${pageId}')"]`).classList.add('active');
       }
-    }
 
-    async function connectWallet() {
-      try {
-        if (!sdk.wallet?.ethProvider) {
-          alert('Please open in Warpcast to connect wallet');
-          return;
-        }
-
-        provider = sdk.wallet.ethProvider;
-        const accounts = await provider.request({ method: 'eth_requestAccounts' });
-        address = accounts[0];
-        isConnected = true;
-
-        document.querySelectorAll('.wallet-address').forEach(el => {
-          el.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
-          el.style.display = 'block';
-        });
-
-        document.querySelectorAll('.wallet-btn').forEach(btn => {
-          btn.style.display = 'none';
-        });
-
-      } catch (error) {
-        console.error("Wallet connection failed:", error);
+      if (pageId === "profile-page") {
+        loadUserProfile();
       }
-    }
-
-    function disconnectWallet() {
-      isConnected = false;
-      address = null;
-      document.querySelectorAll('.wallet-address').forEach(el => {
-        el.style.display = 'none';
-      });
-      document.querySelectorAll('.wallet-btn').forEach(btn => {
-        btn.style.display = 'block';
-      });
     }
 
     function createStars() {
@@ -121,17 +125,37 @@
       }, 500);
     }
 
-    function showPage(pageId) {
-      previousPage = currentPage;
-      currentPage = pageId;
-      
-      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      
-      document.getElementById(pageId).classList.add('active');
-      
-      if (['home-page', 'leaderboard-page', 'profile-page'].includes(pageId)) {
-        document.querySelector(`.tab-btn[onclick="showPage('${pageId}')"]`).classList.add('active');
+    async function toggleWallet() {
+      if (isConnected) {
+        provider = null;
+        address = null;
+        isConnected = false;
+        document.querySelectorAll('.wallet-address').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.wallet-btn').forEach(btn => btn.style.display = 'block');
+      } else {
+        try {
+          if (!sdk.wallet?.ethProvider) {
+            alert('Please open in Warpcast');
+            return;
+          }
+
+          provider = sdk.wallet.ethProvider;
+          const accounts = await provider.request({ method: 'eth_requestAccounts' });
+          address = accounts[0];
+          isConnected = true;
+
+          document.querySelectorAll('.wallet-address').forEach(el => {
+            el.textContent = `${address.slice(0,6)}...${address.slice(-4)}`;
+            el.style.display = 'block';
+          });
+
+          document.querySelectorAll('.wallet-btn').forEach(btn => {
+            btn.style.display = 'none';
+          });
+
+        } catch (error) {
+          console.error("Wallet error:", error);
+        }
       }
     }
 
@@ -139,12 +163,12 @@
       showPage(previousPage);
     }
 
-    function skipPost() { alert('Post skipped! Loading next...'); }
+    function skipPost() { alert('Skipping post...'); }
     function viewPost() { window.open('https://warpcast.com/faruser1/0x0a6d75f4', '_blank'); }
-    function likePost() { confirm('Did you like this post?') ? alert('+1 COIN!') : alert('Please like first!'); }
+    function likePost() { confirm('Liked?') ? alert('+1 COIN!') : alert('Like first!'); }
 
     function startOrder(type, coins, inputType) {
-      if (!address) return alert('Connect wallet first!');
+      if (!address) return alert('Connect wallet!');
       
       currentOrder = { type, coins, inputType };
       document.getElementById('order-form-title').textContent = `Order: ${type}`;
@@ -158,24 +182,24 @@
 
     function submitOrder() {
       const link = document.getElementById('order-link').value.trim();
-      const submitBtn = document.getElementById('submit-order-btn');
+      const btn = document.getElementById('submit-order-btn');
       
       if (!link) {
-        submitBtn.textContent = 'Invalid link!';
-        submitBtn.classList.add('error');
+        btn.textContent = 'Invalid Link!';
+        btn.classList.add('error');
         setTimeout(() => {
-          submitBtn.textContent = 'Confirm Order';
-          submitBtn.classList.remove('error');
+          btn.textContent = 'Confirm Order';
+          btn.classList.remove('error');
         }, 2000);
         return;
       }
       
-      submitBtn.textContent = 'Order Submitted!';
-      submitBtn.classList.add('success');
+      btn.textContent = 'Order Submitted!';
+      btn.classList.add('success');
       setTimeout(() => {
         showPage('profile-page');
-        submitBtn.textContent = 'Confirm Order';
-        submitBtn.classList.remove('success');
+        btn.textContent = 'Confirm Order';
+        btn.classList.remove('success');
       }, 2000);
     }
   </script>
