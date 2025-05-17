@@ -31,31 +31,52 @@
     let currentOrder = null;
     let isConnected = false;
 
-    // تابع اصلاح شده loadUserProfile ////
-    function loadUserProfile() {
-      const user = sdk.context?.user;
+    
+function loadUserProfile() {
+  const user = sdk.context?.user;
 
-      if (!user) {
-        console.error("User not found in context");
-        document.getElementById("profile-username").textContent = "User not found";
-        return;
+  if (!user) {
+    console.error("User not found in context");
+    document.getElementById("profile-username").textContent = "User not found";
+    return;
+  }
+
+  const username = user.username || `fid:${user.fid}`;
+  const avatar = user.pfp_url || "https://i.imgur.com/placeholder.webp";
+
+  document.getElementById("profile-username").textContent = `@${username}`;
+  document.getElementById("profile-avatar").src = avatar;
+
+  console.log("User loaded:", user);
+}
+
+
+      try {
+        const res = await fetch("https://api.neynar.com/v2/farcaster/user/bulk", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "api_key": apiKey
+          },
+          body: JSON.stringify({ fids: [user.fid] })
+        });
+
+        const data = await res.json();
+        const profile = data.users?.[0];
+
+        if (profile) {
+          document.getElementById("profile-avatar").src = profile.pfp_url;
+          document.getElementById("profile-username").textContent = `@${profile.username}`;
+        }
+      } catch (error) {
+        console.error("Profile load failed:", error);
       }
-
-      const username = user.username || `fid:${user.fid}`;
-      const avatar = user.pfp_url || "https://i.imgur.com/placeholder.webp";
-
-      document.getElementById("profile-username").textContent = `@${username}`;
-      document.getElementById("profile-avatar").src = avatar;
-
-      console.log("User loaded:", user);
     }
-    ////////////////////////////////
 
     document.addEventListener('DOMContentLoaded', async () => {
       try {
         await sdk.actions.ready();
-        window.sdkContext = sdk.context; // خط اضافه شده
-        
+        window.sdkContext = sdk.context;
         document.body.style.opacity = 1;
         document.getElementById('loading').style.display = 'none';
         initializeApp();
