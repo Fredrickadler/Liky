@@ -5,11 +5,11 @@
     "signature": "<base64url-signature>"
   },
   "frame": {
-    "name": "My Mini App",
+    "name": "Liky...!",
     "version": "1",
-    "iconUrl": "https://yourdomain.com/icon.png",
-    "homeUrl": "https://yourdomain.com",
-    "splashImageUrl": "https://yourdomain.com/splash.png",
+    "iconUrl": "https://i.imgur.com/Qrx4yWZ.jpeg",
+    "homeUrl": "https://liky-omega.vercel.app",
+    "splashImageUrl": "https://i.imgur.com/nyI4nlz_d.webp?maxwidth=1520&fidelity=grand",
     "splashBackgroundColor": "#ffffff"
   }
 }
