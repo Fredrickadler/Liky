@@ -1,15 +1,16 @@
 {
   "accountAssociation": {
-    "header": "...",
-    "payload": "...",
-    "signature": "..."
+    "header": "eyJmaWQiOjkyOTkxMCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDQ3ZTg5Q0YzMDBFNzI5MGNFMEE2Mjc2NzAwQTU1NjM5YmZCYkE3MzUifQ",
+    "payload": "eyJkb21haW4iOiJsaWt5LW9tZWdhLnZlcmNlbC5hcHAifQ",
+    "signature": "MHgyMmRiZThlNWJmZDhmZTczYjY1ZWEyY2RlOTYwMzY0NTY4OWZlMWYxZDI2ODc2YmQ5YTQxMDA5MDc1YzljNmI0MmExZjlkOTdmZmFiNTVlNTU0MjYyMTFkOWNmNzYyMzQ5NWZkODdhNzljMzZiOTZhYTQ1NmQ5MGQ3YjdhNjI4NTFj"
   },
   "frame": {
     "version": "1",
-    "name": "Liky",
+    "name": "Liky...!",
+    "iconUrl": "https://liky-omega.vercel.app/icon.png",
     "homeUrl": "https://liky-omega.vercel.app",
-    "iconUrl": "https://i.imgur.com/Qrx4yWZ_d.webp",
-    "splashImageUrl": "https://i.imgur.com/nyI4nlz_d.webp",
-    "splashBackgroundColor": "#ffffff"
+    "splashImageUrl": "https://liky-omega.vercel.app/splash.png",
+    "splashBackgroundColor": "#eeccff",
+    "webhookUrl": "https://liky-omega.vercel.app/api/webhook"
   }
 }
