@@ -6,7 +6,20 @@
   <title>FarKaster</title>
 
   <!-- Farcaster Meta Tag -->
-  <meta name="fc:frame" content='{"version":"next","imageUrl":"https://i.imgur.com/dDpcwCa_d.webp?maxwidth=1520&fidelity=grand","button":{"title":"Liky...!","action":{"type":"launch_frame","name":"Liky...!","url":"https://liky-omega.vercel.app","splashImageUrl":"https://i.imgur.com/nyI4nlz_d.webp?maxwidth=1520&fidelity=grand","splashBackgroundColor":"#2E2E2E"}}}' />
+  <meta name="fc:frame" content='{
+    "version":"next",
+    "imageUrl":"https://i.imgur.com/Qrx4yWZ_d.webp",
+    "button":{
+      "title":"Liky…!",
+      "action":{
+        "type":"launch_frame",
+        "name":"Liky…!",
+        "url":"https://liky-omega.vercel.app",
+        "splashImageUrl":"https://i.imgur.com/nyI4nlz_d.webp",
+        "splashBackgroundColor":"#ffffff"
+      }
+    }
+  }' />
 
   <!-- Farcaster SDK -->
   <script type="module">
@@ -829,6 +842,15 @@
         <label class="form-label" id="order-link-label">Post Link</label>
         <input type="text" class="form-input" id="order-link" placeholder="https://warpcast.com/yourusername/0x123456">
       </div>
+
+      <!-- بخش جدید نمایش پست -->
+      <div class="order-item" id="verified-post" style="display:none; margin-top: 20px;">
+        <div class="order-type" id="verified-post-title">@username</div>
+        <div class="order-details">
+          <span id="verified-post-text">Post text...</span><br>
+          <img id="verified-post-img" src="" style="width:100%; margin-top:10px; border-radius:8px;" />
+        </div>
+      </div>
       
       <div class="form-group">
         <label class="form-label">Your Wallet Address</label>
@@ -966,6 +988,45 @@
       }, 500);
     }
 
+    async function verifyCastFromLink() {
+      const apiKey = "D8460DB2-32C8-45E0-8C56-0ACB0FE02C29";
+      const input = document.getElementById("order-link").value.trim();
+      const castHash = input.split("/").pop();
+
+      if (!castHash.startsWith("0x")) {
+        alert("Invalid post link");
+        return;
+      }
+
+      // Get cast data
+      const castRes = await fetch(`https://api.neynar.com/v2/farcaster/cast?cast_hash=${castHash}`, {
+        headers: { "api_key": apiKey }
+      });
+      const cast = (await castRes.json()).cast;
+
+      // Display post
+      document.getElementById("verified-post-title").textContent = "@" + cast.author.username;
+      document.getElementById("verified-post-text").textContent = cast.text;
+      if (cast.embeds?.[0]?.url) {
+        document.getElementById("verified-post-img").src = cast.embeds[0].url;
+      }
+      document.getElementById("verified-post").style.display = "block";
+
+      // Check likes
+      const currentUser = sdk.state.getFarUser();
+      const reactionRes = await fetch(`https://api.neynar.com/v2/farcaster/cast/reactions?cast_hash=${castHash}`, {
+        headers: { "api_key": apiKey }
+      });
+      const reactions = (await reactionRes.json()).reactions;
+
+      const liked = reactions.some(r => r.reaction_type === "like" && r.fid === currentUser.fid);
+      if (liked) {
+        alert("✅ Verified! You liked this post. +1 COIN!");
+      } else {
+        alert("❌ You haven't liked this post yet.");
+      }
+    }
+
     function showPage(pageId) {
       previousPage = currentPage;
       currentPage = pageId;
@@ -1022,6 +1083,8 @@
         submitBtn.textContent = 'Confirm Order';
         submitBtn.classList.remove('success');
       }, 2000);
+
+      verifyCastFromLink();
     }
   </script>
 </body>
