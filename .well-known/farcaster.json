@@ -1,1 +1,15 @@
-z
+{
+  "accountAssociation": {
+    "header": "<your-base64url-header>",
+    "payload": "<base64url-payload>",
+    "signature": "<base64url-signature>"
+  },
+  "frame": {
+    "name": "My Mini App",
+    "version": "1",
+    "iconUrl": "https://yourdomain.com/icon.png",
+    "homeUrl": "https://yourdomain.com",
+    "splashImageUrl": "https://yourdomain.com/splash.png",
+    "splashBackgroundColor": "#ffffff"
+  }
+}
