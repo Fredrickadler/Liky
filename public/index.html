@@ -22,205 +22,7 @@
   }' />
 
   <!-- Farcaster SDK -->
-  <script type="module">
-    import sdk from "https://esm.sh/@farcaster/frame-sdk";
-
-    let provider, address;
-    let currentPage = 'home-page';
-    let previousPage = 'home-page';
-    let currentOrder = null;
-    let isConnected = false;
-
-    
-function loadUserProfile() {
-  const user = sdk.context?.user;
-
-  if (!user) {
-    console.error("User not found in context");
-    document.getElementById("profile-username").textContent = "User not found";
-    return;
-  }
-
-  const username = user.username || `fid:${user.fid}`;
-  const avatar = user.pfp_url || "https://i.imgur.com/placeholder.webp";
-
-  document.getElementById("profile-username").textContent = `@${username}`;
-  document.getElementById("profile-avatar").src = avatar;
-
-  console.log("User loaded:", user);
-}
-
-
-      try {
-        const res = await fetch("https://api.neynar.com/v2/farcaster/user/bulk", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "api_key": apiKey
-          },
-          body: JSON.stringify({ fids: [user.fid] })
-        });
-
-        const data = await res.json();
-        const profile = data.users?.[0];
-
-        if (profile) {
-          document.getElementById("profile-avatar").src = profile.pfp_url;
-          document.getElementById("profile-username").textContent = `@${profile.username}`;
-        }
-      } catch (error) {
-        console.error("Profile load failed:", error);
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        await sdk.actions.ready();
-const context = sdk.context;
-
-if (!context?.user) {
-  console.error("No user in context:", context);
-} else {
-  window.sdkContext = context;
-  loadUserProfile(); // فقط بعد از آماده‌شدن context
-}
-        window.sdkContext = sdk.context;
-        document.body.style.opacity = 1;
-        document.getElementById('loading').style.display = 'none';
-        initializeApp();
-      } catch (error) {
-        console.error("Initialization Error:", error);
-        document.getElementById('loading').style.display = 'none';
-        document.body.innerHTML = `<div class="error">Initialization Failed</div>`;
-      }
-    });
-
-    function initializeApp() {
-      createStars();
-      window.showPage = showPage;
-      window.goBack = goBack;
-      window.skipPost = skipPost;
-      window.viewPost = viewPost;
-      window.likePost = likePost;
-      window.startOrder = startOrder;
-      window.submitOrder = submitOrder;
-      window.toggleWallet = toggleWallet;
-    }
-
-    function showPage(pageId) {
-      previousPage = currentPage;
-      currentPage = pageId;
-      
-      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      
-      document.getElementById(pageId).classList.add('active');
-      
-      if (['home-page', 'leaderboard-page', 'profile-page'].includes(pageId)) {
-        document.querySelector(`.tab-btn[onclick="showPage('${pageId}')"]`).classList.add('active');
-      }
-
-      
-    }
-
-    function createStars() {
-      const starsContainer = document.getElementById('stars');
-      starsContainer.innerHTML = '';
-      
-      setTimeout(() => {
-        for (let i = 0; i < 100; i++) {
-          const star = document.createElement('div');
-          star.classList.add('star');
-          star.style.left = `${Math.random() * 100}%`;
-          star.style.top = `${Math.random() * 100}%`;
-          star.style.width = `${Math.random() * 3 + 1}px`;
-          star.style.height = star.style.width;
-          star.style.animationDelay = `${Math.random() * 3}s`;
-          star.style.animationDuration = `${Math.random() * 30 + 20}s`;
-          star.style.opacity = '0.3';
-          starsContainer.appendChild(star);
-        }
-      }, 500);
-    }
-
-    async function toggleWallet() {
-      if (isConnected) {
-        provider = null;
-        address = null;
-        isConnected = false;
-        document.querySelectorAll('.wallet-address').forEach(el => el.style.display = 'none');
-        document.querySelectorAll('.wallet-btn').forEach(btn => btn.style.display = 'block');
-      } else {
-        try {
-          if (!sdk.wallet?.ethProvider) {
-            alert('Please open in Warpcast');
-            return;
-          }
-
-          provider = sdk.wallet.ethProvider;
-          const accounts = await provider.request({ method: 'eth_requestAccounts' });
-          address = accounts[0];
-          isConnected = true;
-
-          document.querySelectorAll('.wallet-address').forEach(el => {
-            el.textContent = `${address.slice(0,6)}...${address.slice(-4)}`;
-            el.style.display = 'block';
-          });
-
-          document.querySelectorAll('.wallet-btn').forEach(btn => {
-            btn.style.display = 'none';
-          });
-
-        } catch (error) {
-          console.error("Wallet error:", error);
-        }
-      }
-    }
-
-    function goBack() {
-      showPage(previousPage);
-    }
-
-    function skipPost() { alert('Skipping post...'); }
-    function viewPost() { window.open('https://warpcast.com/faruser1/0x0a6d75f4', '_blank'); }
-    function likePost() { confirm('Liked?') ? alert('+1 COIN!') : alert('Like first!'); }
-
-    function startOrder(type, coins, inputType) {
-      if (!address) return alert('Connect wallet!');
-      
-      currentOrder = { type, coins, inputType };
-      document.getElementById('order-form-title').textContent = `Order: ${type}`;
-      document.getElementById('package-name').value = type;
-      document.getElementById('package-price').value = `${coins} COINS`;
-      document.getElementById('wallet-address').value = address;
-      
-      document.getElementById('order-link-label').textContent = inputType === 'post' ? 'Post Link' : 'Profile Link';
-      showPage('order-form-page');
-    }
-
-    function submitOrder() {
-      const link = document.getElementById('order-link').value.trim();
-      const btn = document.getElementById('submit-order-btn');
-      
-      if (!link) {
-        btn.textContent = 'Invalid Link!';
-        btn.classList.add('error');
-        setTimeout(() => {
-          btn.textContent = 'Confirm Order';
-          btn.classList.remove('error');
-        }, 2000);
-        return;
-      }
-      
-      btn.textContent = 'Order Submitted!';
-      btn.classList.add('success');
-      setTimeout(() => {
-        showPage('profile-page');
-        btn.textContent = 'Confirm Order';
-        btn.classList.remove('success');
-      }, 2000);
-    }
-  </script>
+  
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -802,6 +604,7 @@ if (!context?.user) {
       .wallet-btn, .wallet-address { padding: 10px 20px; font-size: 14px; }
     }
   </style>
+<script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk@latest/dist/frame-sdk.umd.js"></script>
 </head>
 <body>
   <!-- Loading Screen -->
@@ -1078,5 +881,53 @@ if (!context?.user) {
       <span>Profile</span>
     </div>
   </div>
+
+<script>
+  let provider, address;
+  let currentPage = 'home-page';
+  let previousPage = 'home-page';
+  let currentOrder = null;
+  let isConnected = false;
+
+  function loadUserProfile() {
+    const user = window.sdk?.context?.user;
+
+    if (!user) {
+      console.error("User not found in context");
+      document.getElementById("profile-username").textContent = "User not found";
+      return;
+    }
+
+    const username = user.username || `fid:${user.fid}`;
+    const avatar = user.pfp_url || "https://i.imgur.com/placeholder.webp";
+
+    document.getElementById("profile-username").textContent = `@${username}`;
+    document.getElementById("profile-avatar").src = avatar;
+
+    console.log("User loaded:", user);
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      await window.sdk.actions.ready();
+      const context = window.sdk.context;
+
+      if (!context?.user) {
+        console.error("No user in context:", context);
+      } else {
+        window.sdkContext = context;
+        loadUserProfile();
+      }
+
+      document.body.style.opacity = 1;
+      document.getElementById('loading').style.display = 'none';
+    } catch (error) {
+      console.error("Initialization Error:", error);
+      document.getElementById('loading').style.display = 'none';
+      document.body.innerHTML = `<div class="error">Initialization Failed</div>`;
+    }
+  });
+</script>
+
 </body>
 </html>
