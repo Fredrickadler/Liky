@@ -33,11 +33,11 @@
 
     async function loadUserProfile() {
       const apiKey = "D8460DB2-32C8-45E0-8C56-0ACB0FE02C29";
-      const context = await sdk.context;
-      console.log("Context:", context);
+      const user = window.sdkContext?.user;
 
-      if (!context?.user?.fid) {
-        console.error("User fid not found in context");
+      if (!user?.fid) {
+        console.error("User fid not found in context", window.sdkContext);
+        document.getElementById("profile-username").textContent = "User not found";
         return;
       }
 
@@ -48,7 +48,7 @@
             "Content-Type": "application/json",
             "api_key": apiKey
           },
-          body: JSON.stringify({ fids: [context.user.fid] })
+          body: JSON.stringify({ fids: [user.fid] })
         });
 
         const data = await res.json();
@@ -57,15 +57,21 @@
         if (profile) {
           document.getElementById("profile-avatar").src = profile.pfp_url;
           document.getElementById("profile-username").textContent = `@${profile.username}`;
+        } else {
+          console.error("No user found in response:", data);
+          document.getElementById("profile-username").textContent = "No profile data";
         }
       } catch (error) {
         console.error("Profile load failed:", error);
+        document.getElementById("profile-username").textContent = "Error loading profile";
       }
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
       try {
         await sdk.actions.ready();
+        window.sdkContext = sdk.context;
+        
         document.body.style.opacity = 1;
         document.getElementById('loading').style.display = 'none';
         initializeApp();
