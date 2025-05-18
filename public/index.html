@@ -5,60 +5,75 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>FarKaster</title>
 
-  <!-- Farcaster Meta Tag -->
-  <meta name="fc:frame" content='{
-    "version":"next",
-    "imageUrl":"https://i.imgur.com/Qrx4yWZ_d.webp",
-    "button":{
-      "title":"Liky…!",
-      "action":{
-        "type":"launch_frame",
-        "name":"Liky…!",
-        "url":"https://liky-omega.vercel.app",
-        "splashImageUrl":"https://i.imgur.com/nyI4nlz_d.webp",
-        "splashBackgroundColor":"#ffffff"
-      }
-    }
-  }' />
+  <meta property="fc:frame" content="vNext" />
+  <meta property="fc:frame:image" content="https://i.imgur.com/Qrx4yWZ_d.webp" />
+  <meta property="fc:frame:button:1" content="Liky…!" />
+  <meta property="fc:frame:button:1:action" content="post_redirect" />
+  <meta property="fc:frame:post_url" content="https://liky-omega.vercel.app/api/frame" />
 
-  <!-- Farcaster SDK -->
   <script type="module">
     import sdk from "https://esm.sh/@farcaster/frame-sdk";
 
-    let provider, address;
+    const NEYNAR_API_KEY = "D8460DB2-32C8-45E0-8C56-0ACB0FE02C29";
+    
+    let provider = null;
+    let address = null;
     let currentPage = 'home-page';
     let previousPage = 'home-page';
     let currentOrder = null;
     let isConnected = false;
 
     async function loadUserProfile() {
-      const apiKey = "D8460DB2-32C8-45E0-8C56-0ACB0FE02C29";
-      const user = sdk.state.getFarUser();
+      const loadingElement = document.getElementById('profile-loading');
+      const avatarElement = document.getElementById('profile-avatar');
+      const usernameElement = document.getElementById('profile-username');
       
-      if (!user) {
-        console.error("User not found");
-        return;
-      }
-
       try {
-        const res = await fetch("https://api.neynar.com/v2/farcaster/user/bulk", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "api_key": apiKey
-          },
-          body: JSON.stringify({ fids: [user.fid] })
-        });
+        loadingElement.style.display = 'block';
+        avatarElement.style.display = 'none';
+        usernameElement.textContent = '';
 
-        const data = await res.json();
-        const profile = data.users?.[0];
+        const context = await sdk.context;
+        const user = context?.user;
 
-        if (profile) {
-          document.getElementById("profile-avatar").src = profile.pfp_url;
-          document.getElementById("profile-username").textContent = `@${profile.username}`;
+        if (!user?.fid) {
+          throw new Error('No Farcaster user detected');
         }
+
+        const fallbackUsername = user.username || `fid:${user.fid}`;
+        const fallbackPfp = user.pfpUrl || 'https://i.imgur.com/UH3IPXw.png';
+
+        try {
+          const neynarResponse = await fetch("https://api.neynar.com/v2/farcaster/user/bulk", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "api_key": NEYNAR_API_KEY
+            },
+            body: JSON.stringify({ fids: [user.fid] })
+          });
+
+          const neynarData = await neynarResponse.json();
+          const profile = neynarData.users?.[0];
+
+          if (profile) {
+            avatarElement.src = profile.pfp_url;
+            usernameElement.textContent = `@${profile.username}`;
+          } else {
+            throw new Error('No Neynar data');
+          }
+        } catch (neynarError) {
+          avatarElement.src = fallbackPfp;
+          usernameElement.textContent = `@${fallbackUsername} (basic)`;
+        }
+
+        avatarElement.style.display = 'block';
+        loadingElement.style.display = 'none';
+
       } catch (error) {
-        console.error("Profile load failed:", error);
+        loadingElement.textContent = 'Profile load failed';
+        loadingElement.style.display = 'block';
+        avatarElement.style.display = 'none';
       }
     }
 
@@ -66,12 +81,11 @@
       try {
         await sdk.actions.ready();
         document.body.style.opacity = 1;
-        document.getElementById('loading').style.display = 'none';
+        document.getElementById('global-loading').style.display = 'none';
         initializeApp();
+        loadUserProfile();
       } catch (error) {
-        console.error("Initialization Error:", error);
-        document.getElementById('loading').style.display = 'none';
-        document.body.innerHTML = `<div class="error">Initialization Failed</div>`;
+        document.getElementById('global-loading').textContent = 'Please open in Warpcast';
       }
     });
 
@@ -203,9 +217,6 @@
       }, 2000);
     }
   </script>
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -777,6 +788,31 @@
     .submit-btn.error { background: var(--error); }
     .submit-btn.success { background: var(--success); }
 
+    #profile-loading {
+      padding: 20px;
+      text-align: center;
+      color: var(--gray-400);
+      font-size: 16px;
+      display: none;
+    }
+
+    #profile-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin: 20px auto;
+      display: none;
+      border: 3px solid var(--primary);
+    }
+
+    #profile-username {
+      font-size: 24px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
     @media (max-width: 768px) {
       .post-image-container { height: 300px; }
       .profile-avatar { width: 100px; height: 100px; }
@@ -786,15 +822,16 @@
   </style>
 </head>
 <body>
-  <!-- Loading Screen -->
-  <div class="loading-overlay" id="loading">
+  <div class="loading-overlay" id="global-loading">
     <div class="loading-spinner"></div>
   </div>
 
-  <!-- Star Animation -->
   <div class="stars" id="stars"></div>
 
-  <!-- Home Page -->
+  <div id="profile-loading">Loading profile...</div>
+  <img id="profile-avatar" alt="User avatar">
+  <div id="profile-username"></div>
+
   <div class="page active" id="home-page">
     <div class="header">
       <div class="add-order-btn" onclick="showPage('order-page')">
@@ -803,7 +840,7 @@
       <button class="wallet-btn" onclick="toggleWallet()">
         <i class="fas fa-wallet"></i> Connect Wallet
       </button>
-      <div class="wallet-address" id="walletAddress" onclick="toggleWallet()"></div>
+      <div class="wallet-address" id="walletAddress"></div>
     </div>
     
     <div class="post-container">
@@ -842,7 +879,6 @@
     </div>
   </div>
 
-  <!-- Leaderboard Page -->
   <div class="page" id="leaderboard-page">
     <div class="header">
       <div class="add-order-btn" onclick="showPage('order-page')">
@@ -851,7 +887,7 @@
       <button class="wallet-btn" onclick="toggleWallet()">
         <i class="fas fa-wallet"></i> Connect Wallet
       </button>
-      <div class="wallet-address" id="walletAddress2" onclick="toggleWallet()"></div>
+      <div class="wallet-address" id="walletAddress2"></div>
     </div>
     
     <div class="post-container">
@@ -891,7 +927,6 @@
     </div>
   </div>
 
-  <!-- Profile Page -->
   <div class="page" id="profile-page">
     <div class="header">
       <div class="add-order-btn" onclick="showPage('order-page')">
@@ -900,11 +935,11 @@
       <button class="wallet-btn" onclick="toggleWallet()">
         <i class="fas fa-wallet"></i> Connect Wallet
       </button>
-      <div class="wallet-address" id="walletAddress3" onclick="toggleWallet()"></div>
+      <div class="wallet-address" id="walletAddress3"></div>
     </div>
     
     <div class="profile-content">
-      <img id="profile-avatar" src="https://i.imgur.com/placeholder.webp" class="profile-avatar" alt="Profile">
+      <img id="profile-avatar" class="profile-avatar" alt="Profile">
       <div id="profile-username" class="profile-username">@username</div>
       
       <div class="profile-stats">
@@ -942,7 +977,6 @@
     </div>
   </div>
 
-  <!-- Order Page -->
   <div class="page" id="order-page">
     <div class="header">
       <button class="back-btn" onclick="goBack()">
@@ -951,7 +985,7 @@
       <button class="wallet-btn" onclick="toggleWallet()">
         <i class="fas fa-wallet"></i> Connect Wallet
       </button>
-      <div class="wallet-address" id="walletAddress4" onclick="toggleWallet()"></div>
+      <div class="wallet-address" id="walletAddress4"></div>
     </div>
     
     <div class="packages-container">
@@ -996,7 +1030,6 @@
     </div>
   </div>
 
-  <!-- Order Form Page -->
   <div class="page" id="order-form-page">
     <div class="header">
       <button class="back-btn" onclick="showPage('order-page')">
@@ -1005,7 +1038,7 @@
       <button class="wallet-btn" onclick="toggleWallet()">
         <i class="fas fa-wallet"></i> Connect Wallet
       </button>
-      <div class="wallet-address" id="walletAddress5" onclick="toggleWallet()"></div>
+      <div class="wallet-address" id="walletAddress5"></div>
     </div>
     
     <div class="order-form-container">
@@ -1045,7 +1078,6 @@
     </div>
   </div>
 
-  <!-- Tab Bar -->
   <div class="tab-bar">
     <div class="tab-btn active" onclick="showPage('home-page')">
       <i class="fas fa-home"></i>
@@ -1060,5 +1092,7 @@
       <span>Profile</span>
     </div>
   </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 </body>
 </html>
