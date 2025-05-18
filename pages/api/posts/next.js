@@ -1,11 +1,21 @@
-// /pages/api/posts/next.js
-import { posts } from './index'; // فرض بر اینه که تو یه فایل مشترک نگه می‌داری
+// pages/api/posts/next.js
+import { db } from "../../../lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
-export default function handler(req, res) {
-  if (posts.length === 0) {
-    return res.status(404).json({ message: 'No posts found' });
+export default async function handler(req, res) {
+  const postsRef = collection(db, "posts");
+
+  try {
+    const snapshot = await getDocs(postsRef);
+    const posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    if (!posts.length) {
+      return res.status(404).json({ message: "No posts found" });
+    }
+
+    const randomPost = posts[Math.floor(Math.random() * posts.length)];
+    return res.status(200).json(randomPost);
+  } catch (err) {
+    return res.status(500).json({ error: "Error loading post" });
   }
-
-  const randomPost = posts[Math.floor(Math.random() * posts.length)];
-  return res.status(200).json(randomPost);
 }
