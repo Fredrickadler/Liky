@@ -32,44 +32,39 @@
     let isConnected = false;
 
     async function loadUserProfile() {
-      const apiKey = "D8460DB2-32C8-45E0-8C56-0ACB0FE02C29";
-      
-      try {
-        // تغییر اصلی این دو خط است
-        const context = await sdk.context;
-        const user = context?.user;
+  const apiKey = "D8460DB2-32C8-45E0-8C56-0ACB0FE02C29";
 
-        if (!user) {
-          console.error("User context not available");
-          return;
-        }
+  try {
+    const context = await sdk.context; // گرفتن context صحیح از SDK
+    const user = context?.user;
 
-        const res = await fetch("https://api.neynar.com/v2/farcaster/user/bulk", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "api_key": apiKey
-          },
-          body: JSON.stringify({ fids: [user.fid] })
-        });
-
-        const data = await res.json();
-        const profile = data.users?.[0];
-
-        if (profile) {
-          document.getElementById("profile-avatar").src = profile.pfp_url;
-          document.getElementById("profile-username").textContent = `@${profile.username}`;
-          
-          // اضافه شده: هندلینگ خطای آواتار
-          document.getElementById("profile-avatar").onerror = function() {
-            this.src = 'https://i.imgur.com/placeholder.webp';
-          }
-        }
-      } catch (error) {
-        console.error("Profile load failed:", error);
-        document.getElementById("profile-username").textContent = "Failed to load profile";
-      }
+    if (!user || !user.fid) {
+      console.error("User context not available");
+      return;
     }
+
+    const fid = user.fid;
+
+    const res = await fetch("https://api.neynar.com/v2/farcaster/user/bulk", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "api_key": apiKey,
+      },
+      body: JSON.stringify({ fids: [fid] }),
+    });
+
+    const data = await res.json();
+    const profile = data.users?.[0];
+
+    if (profile) {
+      document.getElementById("profile-avatar").src = profile.pfp_url;
+      document.getElementById("profile-username").textContent = `@${profile.username}`;
+    }
+  } catch (error) {
+    console.error("Profile load failed:", error);
+  }
+}
 
     document.addEventListener('DOMContentLoaded', async () => {
       try {
