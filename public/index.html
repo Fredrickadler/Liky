@@ -22,11 +22,13 @@
     let previousPage = 'home-page';
     let currentOrder = null;
     let isConnected = false;
+    let currentUsername = '@user';
 
     async function loadUserProfile() {
       const loadingElement = document.getElementById('profile-loading');
       const avatarElement = document.getElementById('profile-avatar');
       const usernameElement = document.getElementById('profile-username');
+      const postTitleElement = document.getElementById('post-title');
       
       try {
         loadingElement.style.display = 'block';
@@ -36,9 +38,7 @@
         const context = await sdk.context;
         const user = context?.user;
 
-        if (!user?.fid) {
-          throw new Error('No Farcaster user detected');
-        }
+        if (!user?.fid) throw new Error('No user');
 
         const fallbackUsername = user.username || `fid:${user.fid}`;
         const fallbackPfp = user.pfpUrl || 'https://i.imgur.com/UH3IPXw.png';
@@ -52,26 +52,25 @@
             },
             body: JSON.stringify({ fids: [user.fid] })
           });
-
           const neynarData = await neynarResponse.json();
           const profile = neynarData.users?.[0];
 
           if (profile) {
             avatarElement.src = profile.pfp_url;
             usernameElement.textContent = `@${profile.username}`;
-          } else {
-            throw new Error('No Neynar data');
-          }
-        } catch (neynarError) {
+            currentUsername = `@${profile.username}`;
+          } else throw new Error('No data');
+        } catch {
           avatarElement.src = fallbackPfp;
-          usernameElement.textContent = `@${fallbackUsername} (basic)`;
+          usernameElement.textContent = `@${fallbackUsername}`;
+          currentUsername = `@${fallbackUsername}`;
         }
 
+        postTitleElement.textContent = currentUsername;
         avatarElement.style.display = 'block';
         loadingElement.style.display = 'none';
-
-      } catch (error) {
-        loadingElement.textContent = 'Profile load failed';
+      } catch {
+        loadingElement.textContent = 'Loading error';
         loadingElement.style.display = 'block';
         avatarElement.style.display = 'none';
       }
@@ -84,8 +83,8 @@
         document.getElementById('global-loading').style.display = 'none';
         initializeApp();
         loadUserProfile();
-      } catch (error) {
-        document.getElementById('global-loading').textContent = 'Please open in Warpcast';
+      } catch {
+        document.getElementById('global-loading').textContent = 'Open in Warpcast';
       }
     });
 
@@ -104,25 +103,18 @@
     function showPage(pageId) {
       previousPage = currentPage;
       currentPage = pageId;
-      
       document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      
       document.getElementById(pageId).classList.add('active');
-      
-      if (['home-page', 'leaderboard-page', 'profile-page'].includes(pageId)) {
+      if (['home-page','leaderboard-page','profile-page'].includes(pageId)) {
         document.querySelector(`.tab-btn[onclick="showPage('${pageId}')"]`).classList.add('active');
       }
-
-      if (pageId === "profile-page") {
-        loadUserProfile();
-      }
+      if (pageId === "profile-page") loadUserProfile();
     }
 
     function createStars() {
       const starsContainer = document.getElementById('stars');
       starsContainer.innerHTML = '';
-      
       setTimeout(() => {
         for (let i = 0; i < 100; i++) {
           const star = document.createElement('div');
@@ -149,47 +141,36 @@
       } else {
         try {
           if (!sdk.wallet?.ethProvider) {
-            alert('Please open in Warpcast');
+            alert('Open in Warpcast');
             return;
           }
-
           provider = sdk.wallet.ethProvider;
           const accounts = await provider.request({ method: 'eth_requestAccounts' });
           address = accounts[0];
           isConnected = true;
-
           document.querySelectorAll('.wallet-address').forEach(el => {
             el.textContent = `${address.slice(0,6)}...${address.slice(-4)}`;
             el.style.display = 'block';
           });
-
-          document.querySelectorAll('.wallet-btn').forEach(btn => {
-            btn.style.display = 'none';
-          });
-
+          document.querySelectorAll('.wallet-btn').forEach(btn => btn.style.display = 'none');
         } catch (error) {
           console.error("Wallet error:", error);
         }
       }
     }
 
-    function goBack() {
-      showPage(previousPage);
-    }
-
-    function skipPost() { alert('Skipping post...'); }
+    function goBack() { showPage(previousPage); }
+    function skipPost() { alert('Skipping...'); }
     function viewPost() { window.open('https://warpcast.com/faruser1/0x0a6d75f4', '_blank'); }
     function likePost() { confirm('Liked?') ? alert('+1 COIN!') : alert('Like first!'); }
 
     function startOrder(type, coins, inputType) {
       if (!address) return alert('Connect wallet!');
-      
       currentOrder = { type, coins, inputType };
       document.getElementById('order-form-title').textContent = `Order: ${type}`;
       document.getElementById('package-name').value = type;
       document.getElementById('package-price').value = `${coins} COINS`;
       document.getElementById('wallet-address').value = address;
-      
       document.getElementById('order-link-label').textContent = inputType === 'post' ? 'Post Link' : 'Profile Link';
       showPage('order-form-page');
     }
@@ -197,7 +178,6 @@
     function submitOrder() {
       const link = document.getElementById('order-link').value.trim();
       const btn = document.getElementById('submit-order-btn');
-      
       if (!link) {
         btn.textContent = 'Invalid Link!';
         btn.classList.add('error');
@@ -207,8 +187,7 @@
         }, 2000);
         return;
       }
-      
-      btn.textContent = 'Order Submitted!';
+      btn.textContent = 'Submitted!';
       btn.classList.add('success');
       setTimeout(() => {
         showPage('profile-page');
@@ -796,23 +775,6 @@
       display: none;
     }
 
-    #profile-avatar {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin: 20px auto;
-      display: none;
-      border: 3px solid var(--primary);
-    }
-
-    #profile-username {
-      font-size: 24px;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 30px;
-    }
-
     @media (max-width: 768px) {
       .post-image-container { height: 300px; }
       .profile-avatar { width: 100px; height: 100px; }
@@ -827,10 +789,6 @@
   </div>
 
   <div class="stars" id="stars"></div>
-
-  <div id="profile-loading">Loading profile...</div>
-  <img id="profile-avatar" alt="User avatar">
-  <div id="profile-username"></div>
 
   <div class="page active" id="home-page">
     <div class="header">
@@ -847,7 +805,7 @@
       <div class="post-image-container">
         <img src="https://i.imgur.com/muoYEIu.jpeg" class="post-image" alt="Post">
         <div class="post-overlay">
-          <h3 class="post-title">@faruser1</h3>
+          <h3 class="post-title" id="post-title">@user</h3>
           <p class="post-description">Like this post to earn 1 COIN. Verify after liking.</p>
         </div>
       </div>
@@ -939,8 +897,9 @@
     </div>
     
     <div class="profile-content">
-      <img id="profile-avatar" class="profile-avatar" alt="Profile">
-      <div id="profile-username" class="profile-username">@username</div>
+      <div id="profile-loading">Loading...</div>
+      <img id="profile-avatar" class="profile-avatar" alt="Profile" style="display: none;">
+      <div id="profile-username" class="profile-username"></div>
       
       <div class="profile-stats">
         <div class="stat-item">
