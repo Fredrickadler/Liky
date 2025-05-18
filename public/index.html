@@ -23,7 +23,7 @@
 
   <!-- Farcaster SDK -->
   <script type="module">
-    import sdk from "https://esm.sh/@farcaster/frame-sdk";
+    import { sdk } from "https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk@latest/dist/index.min.js";
 
     let provider, address;
     let currentPage = 'home-page';
@@ -32,16 +32,16 @@
     let isConnected = false;
 
     async function loadUserProfile() {
-      console.log("Loading profile...");
       const apiKey = "D8460DB2-32C8-45E0-8C56-0ACB0FE02C29";
+      console.log("Profile loading started");
 
       try {
         const context = await sdk.context;
-        console.log("User context:", context);
+        console.log("SDK Context:", context);
         
         const user = context?.user;
         if (!user?.fid) {
-          console.error("User context not available");
+          console.error("No user data");
           return;
         }
 
@@ -54,20 +54,18 @@
           body: JSON.stringify({ fids: [user.fid] })
         });
 
+        if (!res.ok) throw new Error(`API Error: ${res.status}`);
+        
         const data = await res.json();
         const profile = data.users?.[0];
 
         if (profile) {
-          document.getElementById("profile-avatar").src = profile.pfp_url;
+          document.getElementById("profile-avatar").src = profile.pfp_url || 'https://i.imgur.com/placeholder.webp';
           document.getElementById("profile-username").textContent = `@${profile.username}`;
-          
-          document.getElementById("profile-avatar").onerror = function() {
-            this.src = 'https://i.imgur.com/placeholder.webp';
-          }
         }
       } catch (error) {
-        console.error("Profile load failed:", error);
-        document.getElementById("profile-username").textContent = "Failed to load profile";
+        console.error("Profile Error:", error);
+        document.getElementById("profile-username").textContent = "Error loading profile";
       }
     }
 
@@ -76,13 +74,14 @@
         await sdk.actions.ready();
         await sdk.frameReady();
         
-        document.body.style.opacity = 1;
         document.getElementById('loading').style.display = 'none';
+        document.body.style.opacity = 1;
+        
         initializeApp();
       } catch (error) {
-        console.error("Initialization Error:", error);
+        console.error("Init Error:", error);
         document.getElementById('loading').style.display = 'none';
-        document.body.innerHTML = `<div class="error">Initialization Failed</div>`;
+        document.body.innerHTML = `<div class="error">INITIALIZATION FAILED</div>`;
       }
     });
 
@@ -102,13 +101,19 @@
       previousPage = currentPage;
       currentPage = pageId;
       
-      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+      });
+      
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
       
       document.getElementById(pageId).classList.add('active');
       
       if (['home-page', 'leaderboard-page', 'profile-page'].includes(pageId)) {
-        document.querySelector(`.tab-btn[onclick="showPage('${pageId}')"]`).classList.add('active');
+        const selector = `.tab-btn[onclick="showPage('${pageId}')"]`;
+        document.querySelector(selector).classList.add('active');
       }
 
       if (pageId === "profile-page") {
@@ -141,17 +146,23 @@
         provider = null;
         address = null;
         isConnected = false;
-        document.querySelectorAll('.wallet-address').forEach(el => el.style.display = 'none');
-        document.querySelectorAll('.wallet-btn').forEach(btn => btn.style.display = 'block');
+        document.querySelectorAll('.wallet-address').forEach(el => {
+          el.style.display = 'none';
+        });
+        document.querySelectorAll('.wallet-btn').forEach(btn => {
+          btn.style.display = 'block';
+        });
       } else {
         try {
           if (!sdk.wallet?.ethProvider) {
-            alert('Please open in Warpcast');
+            alert('Open in Warpcast to connect wallet');
             return;
           }
 
           provider = sdk.wallet.ethProvider;
-          const accounts = await provider.request({ method: 'eth_requestAccounts' });
+          const accounts = await provider.request({ 
+            method: 'eth_requestAccounts' 
+          });
           address = accounts[0];
           isConnected = true;
 
@@ -165,7 +176,7 @@
           });
 
         } catch (error) {
-          console.error("Wallet error:", error);
+          console.error("Wallet Error:", error);
         }
       }
     }
@@ -174,12 +185,23 @@
       showPage(previousPage);
     }
 
-    function skipPost() { alert('Skipping post...'); }
-    function viewPost() { window.open('https://warpcast.com/faruser1/0x0a6d75f4', '_blank'); }
-    function likePost() { confirm('Liked?') ? alert('+1 COIN!') : alert('Like first!'); }
+    function skipPost() { 
+      alert('Skipping post...'); 
+    }
+
+    function viewPost() { 
+      window.open('https://warpcast.com/faruser1/0x0a6d75f4', '_blank'); 
+    }
+
+    function likePost() { 
+      confirm('Confirm like?') ? alert('+1 COIN!') : alert('Like canceled'); 
+    }
 
     function startOrder(type, coins, inputType) {
-      if (!address) return alert('Connect wallet!');
+      if (!address) {
+        alert('Connect wallet first!');
+        return;
+      }
       
       currentOrder = { type, coins, inputType };
       document.getElementById('order-form-title').textContent = `Order: ${type}`;
@@ -187,7 +209,9 @@
       document.getElementById('package-price').value = `${coins} COINS`;
       document.getElementById('wallet-address').value = address;
       
-      document.getElementById('order-link-label').textContent = inputType === 'post' ? 'Post Link' : 'Profile Link';
+      document.getElementById('order-link-label').textContent = 
+        inputType === 'post' ? 'Post Link' : 'Profile Link';
+      
       showPage('order-form-page');
     }
 
