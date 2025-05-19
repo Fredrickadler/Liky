@@ -1,3 +1,4 @@
+// تابع بررسی رمز
 function checkPassword() {
   const password = document.getElementById('password-input').value;
   const loginStatus = document.getElementById('login-status');
@@ -10,16 +11,19 @@ function checkPassword() {
   }
 }
 
+// تابع ارسال سکه
 function sendCoins() {
   const fid = document.getElementById('fid').value;
   const amount = parseInt(document.getElementById('amount').value);
   const status = document.getElementById('status');
 
+  // اعتبارسنجی اولیه
   if (!fid || isNaN(amount) || amount <= 0) {
     status.textContent = 'Invalid input.';
     return;
   }
 
+  // ارسال درخواست به PHP
   fetch('api/send-coins.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -29,11 +33,14 @@ function sendCoins() {
     .then(data => {
       if (data.success) {
         status.textContent = 'Coins sent successfully.';
+        status.style.color = 'green';
       } else {
         status.textContent = 'Failed: ' + (data.error || JSON.stringify(data));
+        status.style.color = 'red';
       }
     })
-    .catch(() => {
-      status.textContent = 'Server error.';
+    .catch((err) => {
+      status.textContent = 'Server error: ' + err.message;
+      status.style.color = 'red';
     });
 }
