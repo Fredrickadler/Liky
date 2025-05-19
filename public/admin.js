@@ -9,11 +9,11 @@ function sendCoins() {
     return;
   }
 
-  fetch('/api/send-coins', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fid, amount })
-  })
+  fetch('api/send-coins.php', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ fid, amount })
+})
     .then(res => res.json())
     .then(data => {
       if (data.success) {
