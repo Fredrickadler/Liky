@@ -1,0 +1,21 @@
+<!-- public/admin.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel - Send Coins</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="admin-container">
+    <h1>Admin Panel: Send Coins</h1>
+    <input type="text" id="fid" placeholder="Enter User FID" />
+    <input type="number" id="amount" placeholder="Enter Coin Amount" />
+    <button onclick="sendCoins()">Send Coins</button>
+    <p id="status"></p>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
