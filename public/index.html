@@ -911,6 +911,23 @@
   </style>
 </head>
 <body>
+  <div id="login-section">
+    <h2>Admin Login</h2>
+    <input type="password" id="password-input" placeholder="Enter Password" />
+    <button onclick="checkPassword()">Enter</button>
+    <p id="login-status" style="color: red;"></p>
+  </div>
+
+  <div id="admin-panel" style="display: none;">
+    <h1>Admin Panel: Send Coins</h1>
+    <input type="text" id="fid" placeholder="Enter User FID" />
+    <input type="number" id="amount" placeholder="Enter Coin Amount" />
+    <button onclick="sendCoins()">Send Coins</button>
+    <p id="status"></p>
+  </div>
+
+  <script src="admin.js"></script>
+
   <div class="loading-overlay" id="global-loading">
     <div class="loading-spinner"></div>
   </div>
